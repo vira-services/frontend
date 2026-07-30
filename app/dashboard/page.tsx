@@ -86,7 +86,7 @@ function DashboardContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get("onboarding") === "1" || localStorage.getItem("vira_onboarded") !== "true") {
+    if (searchParams.get("onboarding") === "1") {
       setShowOnboarding(true);
     }
     Promise.all([getStats(), getStatus(), getCommands()])
