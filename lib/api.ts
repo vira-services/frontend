@@ -162,3 +162,24 @@ export function saveStackables(data: any) {
     body: JSON.stringify(data),
   });
 }
+
+// ---- Bot management ----
+
+export function getBots() {
+  return request("/bots");
+}
+
+export function addBot(botToken: string) {
+  return request("/bots", {
+    method: "POST",
+    body: JSON.stringify({ bot_token: botToken }),
+  });
+}
+
+export function removeBot(botId: number) {
+  return request(`/bots/${botId}`, { method: "DELETE" });
+}
+
+export function reconnectBot(botId: number) {
+  return request(`/bots/${botId}/reconnect`, { method: "POST" });
+}
