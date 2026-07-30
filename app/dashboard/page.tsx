@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaBorderAll, FaTerminal, FaCircle, FaClock, FaCheck } from "react-icons/fa6";
-import { getStats, getStatus, getCommands, completeOnboarding } from "@/lib/api";
+import { getStats, getStatus, getCommands, completeOnboarding, getOnboardingStatus } from "@/lib/api";
 
 function OnboardingModal({ onClose }: { onClose: () => void }) {
   const [token, setToken] = useState("");
@@ -86,17 +86,28 @@ function DashboardContent() {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get("onboarding") === "1") {
-      setShowOnboarding(true);
-    }
-    Promise.all([getStats(), getStatus(), getCommands()])
-      .then(([s, st, c]) => {
+    const onboardingParam = searchParams.get("onboarding") === "1";
+
+    async function load() {
+      try {
+        const [s, st, c, os] = await Promise.all([
+          getStats(),
+          getStatus(),
+          getCommands(),
+          getOnboardingStatus(),
+        ]);
         setStats(s);
         setStatus(st);
         setCmds(c);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+
+        if (onboardingParam || !os.has_token || !os.token_valid) {
+          setShowOnboarding(true);
+        }
+      } catch {}
+      setLoading(false);
+    }
+
+    load();
   }, [searchParams]);
 
   const handleOnboardingClose = () => {

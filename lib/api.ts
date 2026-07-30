@@ -37,6 +37,10 @@ export function completeOnboarding(discordId: string, token: string) {
   });
 }
 
+export function getOnboardingStatus() {
+  return request("/auth/onboarding/status");
+}
+
 export function getStats() {
   return request("/stats");
 }
