@@ -169,10 +169,12 @@ export function getBots() {
   return request("/bots");
 }
 
-export function addBot(botToken: string) {
+export function addBot(botToken: string, clientId?: string) {
+  const body: any = { bot_token: botToken };
+  if (clientId) body.client_id = clientId;
   return request("/bots", {
     method: "POST",
-    body: JSON.stringify({ bot_token: botToken }),
+    body: JSON.stringify(body),
   });
 }
 

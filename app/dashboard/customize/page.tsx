@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { FaBolt, FaPlus, FaTrashCan, FaRotateRight, FaCircleCheck, FaCircleXmark, FaSpinner } from "react-icons/fa6";
+import { FaBolt, FaPlus, FaTrashCan, FaRotateRight, FaCircleCheck, FaCircleXmark, FaSpinner, FaLink, FaCopy } from "react-icons/fa6";
 import { getBots, addBot, removeBot, reconnectBot } from "@/lib/api";
 
 interface Bot {
   id: number;
+  client_id: string | null;
   bot_application_id: string | null;
   connected: boolean;
+  invite_url: string | null;
   created_at: string | null;
   updated_at: string | null;
 }
@@ -20,9 +22,11 @@ export default function CustomizePage() {
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [botToken, setBotToken] = useState("");
+  const [clientId, setClientId] = useState("");
   const [adding, setAdding] = useState(false);
   const [reconnecting, setReconnecting] = useState<number | null>(null);
   const [removing, setRemoving] = useState<number | null>(null);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const fetchBots = useCallback(async () => {
     try {
@@ -44,9 +48,10 @@ export default function CustomizePage() {
     setError("");
     setSuccess("");
     try {
-      await addBot(botToken.trim());
-      setSuccess("Bot added and connected successfully!");
+      const result = await addBot(botToken.trim(), clientId.trim() || undefined);
+      setSuccess("Bot connected! " + (result?.invite_url ? "Use the invite link below to add it to a server." : ""));
       setBotToken("");
+      setClientId("");
       setShowAddForm(false);
       await fetchBots();
     } catch (err: any) {
@@ -85,6 +90,15 @@ export default function CustomizePage() {
     } finally {
       setReconnecting(null);
     }
+  };
+
+  const copyInvite = async (bot: Bot) => {
+    if (!bot.invite_url) return;
+    try {
+      await navigator.clipboard.writeText(bot.invite_url);
+      setCopiedId(bot.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {}
   };
 
   return (
@@ -130,51 +144,101 @@ export default function CustomizePage() {
             )}
 
             {bots.map((bot) => (
-              <div key={bot.id} className="card" style={{ padding: "16px 20px", marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-                  {bot.connected ? (
-                    <FaCircleCheck style={{ fontSize: 16, color: "#2ECC71", flexShrink: 0 }} title="Connected" />
-                  ) : (
-                    <FaCircleXmark style={{ fontSize: 16, color: "#E74C3C", flexShrink: 0 }} title="Disconnected" />
-                  )}
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 13.5, fontWeight: 500, color: "var(--text-primary)" }}>
-                      {bot.bot_application_id ? `Bot #${bot.bot_application_id}` : `Bot #${bot.id}`}
-                    </p>
-                    <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 1 }}>
-                      {bot.connected ? "Connected" : "Disconnected"}
-                      {bot.updated_at ? ` \u00b7 last updated ${new Date(bot.updated_at).toLocaleDateString()}` : ""}
-                    </p>
+              <div key={bot.id}>
+                <div className="card" style={{ padding: "16px 20px", marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+                    {bot.connected ? (
+                      <FaCircleCheck style={{ fontSize: 16, color: "#2ECC71", flexShrink: 0 }} title="Connected" />
+                    ) : (
+                      <FaCircleXmark style={{ fontSize: 16, color: "#E74C3C", flexShrink: 0 }} title="Disconnected" />
+                    )}
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontSize: 13.5, fontWeight: 500, color: "var(--text-primary)" }}>
+                        {bot.client_id || bot.bot_application_id
+                          ? `Bot ${bot.client_id ? `#${bot.client_id}` : `#${bot.bot_application_id}`}`
+                          : `Bot #${bot.id}`}
+                      </p>
+                      <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 1 }}>
+                        {bot.connected ? "Connected" : "Disconnected"}
+                        {bot.updated_at ? ` \u00b7 last updated ${new Date(bot.updated_at).toLocaleDateString()}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                    <button
+                      className="btn btn-secondary"
+                      style={{ height: 30, padding: "0 10px", fontSize: 12 }}
+                      onClick={() => handleReconnectBot(bot.id)}
+                      disabled={reconnecting === bot.id}
+                      title="Reconnect"
+                    >
+                      {reconnecting === bot.id ? (
+                        <FaSpinner style={{ fontSize: 11, animation: "spin 1s linear infinite" }} />
+                      ) : (
+                        <FaRotateRight style={{ fontSize: 11 }} />
+                      )}
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      style={{ height: 30, padding: "0 10px", fontSize: 12 }}
+                      onClick={() => handleRemoveBot(bot.id)}
+                      disabled={removing === bot.id}
+                      title="Remove"
+                    >
+                      {removing === bot.id ? (
+                        <FaSpinner style={{ fontSize: 11, animation: "spin 1s linear infinite" }} />
+                      ) : (
+                        <FaTrashCan style={{ fontSize: 11 }} />
+                      )}
+                    </button>
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                  <button
-                    className="btn btn-secondary"
-                    style={{ height: 30, padding: "0 10px", fontSize: 12 }}
-                    onClick={() => handleReconnectBot(bot.id)}
-                    disabled={reconnecting === bot.id}
-                    title="Reconnect"
+                {bot.invite_url && (
+                  <div
+                    style={{
+                      marginTop: -4,
+                      marginBottom: 8,
+                      padding: "10px 20px 10px 52px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      fontSize: 12.5,
+                      color: "var(--text-tertiary)",
+                    }}
                   >
-                    {reconnecting === bot.id ? (
-                      <FaSpinner style={{ fontSize: 11, animation: "spin 1s linear infinite" }} />
-                    ) : (
-                      <FaRotateRight style={{ fontSize: 11 }} />
-                    )}
-                  </button>
-                  <button
-                    className="btn btn-danger"
-                    style={{ height: 30, padding: "0 10px", fontSize: 12 }}
-                    onClick={() => handleRemoveBot(bot.id)}
-                    disabled={removing === bot.id}
-                    title="Remove"
-                  >
-                    {removing === bot.id ? (
-                      <FaSpinner style={{ fontSize: 11, animation: "spin 1s linear infinite" }} />
-                    ) : (
-                      <FaTrashCan style={{ fontSize: 11 }} />
-                    )}
-                  </button>
-                </div>
+                    <FaLink style={{ fontSize: 11, flexShrink: 0, color: "var(--accent)" }} />
+                    <a
+                      href={bot.invite_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: "var(--accent)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        textDecoration: "none",
+                      }}
+                    >
+                      {bot.invite_url}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => copyInvite(bot)}
+                      title="Copy invite link"
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: copiedId === bot.id ? "#2ECC71" : "var(--text-muted)",
+                        cursor: "pointer",
+                        padding: 2,
+                        fontSize: 13,
+                        flexShrink: 0,
+                      }}
+                    >
+                      <FaCopy style={{ fontSize: 12 }} />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
 
@@ -188,9 +252,9 @@ export default function CustomizePage() {
             {showAddForm && (
               <div className="card" style={{ padding: 24, marginTop: 12 }}>
                 <div style={{ marginBottom: 16 }}>
-                  <p style={{ fontSize: 13.5, fontWeight: 500, color: "var(--text-primary)" }}>New bot token</p>
+                  <p style={{ fontSize: 13.5, fontWeight: 500, color: "var(--text-primary)" }}>New bot</p>
                   <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 2, lineHeight: 1.5 }}>
-                    Paste your Discord bot token. The bot must have the <code style={{ background: "var(--bg-elevated)", padding: "1px 5px", borderRadius: "var(--radius-sm)", fontSize: 12 }}>applications.commands</code> scope enabled.
+                    Paste your bot token and client ID. An invite link will be generated automatically so you can add the bot to your server.
                   </p>
                 </div>
                 <form onSubmit={handleAddBot} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -204,11 +268,20 @@ export default function CustomizePage() {
                       style={{ width: "100%", maxWidth: 440 }}
                     />
                   </div>
+                  <div>
+                    <label className="form-label">Client ID <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>(optional — for invite link)</span></label>
+                    <input
+                      value={clientId}
+                      onChange={(e) => setClientId(e.target.value)}
+                      placeholder="e.g. 123456789012345678"
+                      style={{ width: "100%", maxWidth: 320 }}
+                    />
+                  </div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button type="submit" disabled={adding || !botToken.trim()} className="btn btn-primary">
                       {adding ? "Connecting..." : "Connect bot"}
                     </button>
-                    <button type="button" className="btn btn-secondary" onClick={() => { setShowAddForm(false); setBotToken(""); }}>
+                    <button type="button" className="btn btn-secondary" onClick={() => { setShowAddForm(false); setBotToken(""); setClientId(""); }}>
                       Cancel
                     </button>
                   </div>
