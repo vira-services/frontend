@@ -18,6 +18,17 @@ export default function CommandsPage() {
 
   if (loading) return <div style={{ paddingTop: 20, color: "var(--text-tertiary)", fontSize: 14 }}>Loading commands...</div>;
 
+  if (!data) {
+    return (
+      <div className="animate-stagger">
+        <div className="page-heading">
+          <h1>Commands</h1>
+          <p>Failed to load commands. Make sure the backend is running.</p>
+        </div>
+      </div>
+    );
+  }
+
   const categories = data?.commands || data?.categories || [];
   const prefix = data?.prefix || "-";
 
@@ -26,9 +37,9 @@ export default function CommandsPage() {
     commands: Array.isArray(cat.commands) ? cat.commands.filter((cmd: any) => {
       if (!search) return true;
       const q = search.toLowerCase();
-      const name = (cmd.name || cmd.command || "").toLowerCase();
+      const names = (Array.isArray(cmd.names) ? cmd.names.join(" ") : cmd.name || cmd.command || "").toLowerCase();
       const desc = (cmd.description || "").toLowerCase();
-      return name.includes(q) || desc.includes(q);
+      return names.includes(q) || desc.includes(q);
     }) : [],
   })).filter((cat: any) => cat.commands.length > 0) : [];
 
@@ -55,7 +66,7 @@ export default function CommandsPage() {
         {filtered.map((cat: any, i: number) => (
           <div key={i} className="card" style={{ overflow: "hidden" }}>
             <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
-              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>{cat.name || cat.category || `Category ${i + 1}`}</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)", textTransform: "capitalize" }}>{cat.id || cat.name || cat.category || `Category ${i + 1}`}</p>
             </div>
             <div>
               {cat.commands.map((cmd: any, j: number) => (
@@ -76,7 +87,7 @@ export default function CommandsPage() {
                   <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                     <FaTerminal style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }} />
                     <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 500, color: "var(--text-primary)", whiteSpace: "nowrap" }}>
-                      {prefix}{cmd.name || cmd.command || "?"}
+                      {prefix}{Array.isArray(cmd.names) ? cmd.names[0] : cmd.name || cmd.command || "?"}
                     </span>
                   </div>
                   <span style={{ fontSize: 12.5, color: "var(--text-tertiary)", textAlign: "right", flexShrink: 0, maxWidth: "50%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
