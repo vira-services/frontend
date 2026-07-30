@@ -27,7 +27,7 @@ export default function LoginPage() {
   return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)" }}>
       <div style={{ textAlign: "center", padding: "60px 40px", background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", maxWidth: 420, width: "90%" }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>V</div>
+        <img src="/logo.png" alt="Logo" style={{ width: 64, height: 64, marginBottom: 16, borderRadius: 12, display: "block", margin: "0 auto 16px" }} />
         <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Vira</h1>
         <p style={{ color: "var(--text-secondary)", marginBottom: 32, fontSize: 15 }}>
           Control panel for your selfbot
