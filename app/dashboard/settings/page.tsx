@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { FaGear, FaFloppyDisk } from "react-icons/fa6";
 import { completeOnboarding } from "@/lib/api";
 
 export default function SettingsPage() {
@@ -31,53 +32,59 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="animate-stagger-in space-y-7 pb-10">
-      <header className="animate-fade-up">
-        <p className="mb-2 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-[#52525b]">Preferences</p>
-        <h1 className="text-[clamp(1.85rem,4vw,2.75rem)] font-bold leading-none tracking-[-0.04em] text-white">Settings</h1>
-        <p className="mt-2 max-w-lg text-[0.95rem] leading-relaxed text-[#8a8a92]">Manage your account token and other preferences.</p>
-      </header>
+    <div className="animate-stagger">
+      <div className="page-heading">
+        <h1>Settings</h1>
+        <p>Manage your account token and other preferences.</p>
+      </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <section className="dash-v2-panel p-4 sm:p-5 md:p-6">
-          <div className="mb-4">
-            <h2 className="text-lg font-medium tracking-tight text-white/90">Discord Token</h2>
-            <p className="text-sm text-[#a1a1aa] mt-1">Update the Discord token used by your selfbot. This will replace your current token.</p>
+      <div className="page-section">
+        <div className="section-title">
+          <FaGear style={{ fontSize: 11, opacity: 0.6 }} />
+          Account
+        </div>
+        <div className="card" style={{ padding: 24 }}>
+          <div style={{ marginBottom: 16 }}>
+            <p style={{ fontSize: 13.5, fontWeight: 500, color: "var(--text-primary)" }}>Discord token</p>
+            <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 2, lineHeight: 1.5 }}>
+              Update the Discord token used by your selfbot. This will replace your current token.
+            </p>
           </div>
-          
+
           {error && (
-            <div className="mb-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-400 border border-red-500/20">
-              {error}
+            <div className="message message-error" style={{ marginBottom: 16 }}>
+              <span>{error}</span>
             </div>
           )}
           {success && (
-            <div className="mb-4 rounded-lg bg-emerald-500/10 p-3 text-sm text-emerald-400 border border-emerald-500/20">
-              Token updated successfully! Your bot will restart automatically if connected.
+            <div className="message message-success" style={{ marginBottom: 16 }}>
+              <span>Token updated successfully! Your bot will restart automatically if connected.</span>
             </div>
           )}
 
-          <form onSubmit={handleSave} className="space-y-4">
+          <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-[#a1a1aa] uppercase tracking-wider">New Token</label>
+              <label className="form-label">New token</label>
               <input
                 type="password"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 placeholder="Enter new token..."
-                className="w-full rounded-xl border border-white/10 bg-[#121216] p-3 text-white placeholder-white/30 focus:border-white/30 focus:outline-none"
+                style={{ width: "100%", maxWidth: 400 }}
               />
             </div>
-            <div className="flex justify-end">
+            <div>
               <button
                 type="submit"
                 disabled={loading || !token.trim()}
-                className="rounded-xl bg-white px-5 py-2.5 font-semibold text-black transition hover:bg-white/90 disabled:opacity-50"
+                className="btn btn-primary"
               >
-                {loading ? "Saving..." : "Update Token"}
+                <FaFloppyDisk style={{ fontSize: 12 }} />
+                {loading ? "Saving..." : "Update token"}
               </button>
             </div>
           </form>
-        </section>
+        </div>
       </div>
     </div>
   );

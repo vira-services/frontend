@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FaTerminal, FaMagnifyingGlass } from "react-icons/fa6";
 import { getCommands } from "@/lib/api";
 
 export default function CommandsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     getCommands()
@@ -14,48 +16,85 @@ export default function CommandsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div style={{ color: "var(--text-tertiary)", fontSize: 14, padding: "40px 0" }}>Loading commands...</div>;
+  if (loading) return <div style={{ paddingTop: 20, color: "var(--text-tertiary)", fontSize: 14 }}>Loading commands...</div>;
 
-  const commands = data?.commands || data?.categories || [];
+  const categories = data?.commands || data?.categories || [];
   const prefix = data?.prefix || "-";
 
-  return (
-    <div className="animate-stagger-in space-y-6 pb-10">
-      <header className="animate-fade-up">
-        <p className="mb-2 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-[#52525b]">Extras</p>
-        <h1 className="text-[clamp(1.85rem,4vw,2.75rem)] font-bold leading-none tracking-[-0.04em] text-white">Commands</h1>
-        <p className="mt-2 text-[0.95rem] text-[#8a8a92]">
-          Prefix: <code style={{ background: "var(--bg-secondary)", padding: "2px 8px", borderRadius: 6, fontFamily: "monospace", fontSize: 13 }}>{prefix}</code>
-        </p>
-      </header>
+  const filtered = Array.isArray(categories) ? categories.map((cat: any) => ({
+    ...cat,
+    commands: Array.isArray(cat.commands) ? cat.commands.filter((cmd: any) => {
+      if (!search) return true;
+      const q = search.toLowerCase();
+      const name = (cmd.name || cmd.command || "").toLowerCase();
+      const desc = (cmd.description || "").toLowerCase();
+      return name.includes(q) || desc.includes(q);
+    }) : [],
+  })).filter((cat: any) => cat.commands.length > 0) : [];
 
-      {Array.isArray(commands) ? (
-        commands.map((cat: any, i: number) => (
-          <section key={i} className="dash-v2-panel p-4 sm:p-5 md:p-6">
-            <h2 className="text-sm font-semibold tracking-tight text-white/90 mb-4 pb-3" style={{ borderBottom: "1px solid var(--border)" }}>
-              {cat.name || cat.category || `Category ${i + 1}`}
-            </h2>
-            {Array.isArray(cat.commands) ? (
-              <div className="space-y-1">
-                {cat.commands.map((cmd: any, j: number) => (
-                  <div key={j} className="flex items-center justify-between gap-3 rounded-xl px-2.5 py-2.5 transition-colors hover:bg-[#0a0a0c]">
-                    <div className="flex min-w-0 items-center gap-2.5">
-                      <span className="truncate text-sm font-medium text-[#e4e4e7]">{prefix}{cmd.name || cmd.command || "?"}</span>
-                    </div>
-                    <span className="shrink-0 text-xs text-[#71717a]">{cmd.description || ""}</span>
+  return (
+    <div className="animate-stagger">
+      <div className="page-heading">
+        <h1>Commands</h1>
+        <p>Browse all available commands. Prefix: <code style={{ background: "var(--bg-elevated)", padding: "1px 6px", borderRadius: "var(--radius-sm)", fontFamily: "monospace", fontSize: 12.5, color: "var(--accent)" }}>{prefix}</code></p>
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ position: "relative" }}>
+          <FaMagnifyingGlass style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: "var(--text-muted)", pointerEvents: "none" }} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search commands..."
+            style={{ width: "100%", paddingLeft: 36, maxWidth: 360 }}
+          />
+        </div>
+      </div>
+
+      <div className="page-section" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {filtered.map((cat: any, i: number) => (
+          <div key={i} className="card" style={{ overflow: "hidden" }}>
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid var(--border)" }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-secondary)" }}>{cat.name || cat.category || `Category ${i + 1}`}</p>
+            </div>
+            <div>
+              {cat.commands.map((cmd: any, j: number) => (
+                <div
+                  key={j}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    padding: "10px 20px",
+                    borderBottom: j < cat.commands.length - 1 ? "1px solid var(--border)" : "none",
+                    transition: "background var(--transition-fast)",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                    <FaTerminal style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }} />
+                    <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 500, color: "var(--text-primary)", whiteSpace: "nowrap" }}>
+                      {prefix}{cmd.name || cmd.command || "?"}
+                    </span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-sm text-[#71717a]">No commands in this category</div>
-            )}
-          </section>
-        ))
-      ) : (
-        <section className="dash-v2-panel p-4 sm:p-5 md:p-6">
-          <pre style={{ fontSize: 13, color: "var(--text-secondary)", whiteSpace: "pre-wrap" }}>{JSON.stringify(data, null, 2)}</pre>
-        </section>
-      )}
+                  <span style={{ fontSize: 12.5, color: "var(--text-tertiary)", textAlign: "right", flexShrink: 0, maxWidth: "50%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {cmd.description || ""}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        {filtered.length === 0 && (
+          <div className="empty-state">
+            <FaTerminal style={{ fontSize: 24 }} />
+            <p>{search ? "No commands match your search." : "No commands available."}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

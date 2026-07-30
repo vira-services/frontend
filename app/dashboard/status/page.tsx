@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { FiCircle, FiMoon, FiMinusCircle, FiCheck } from "react-icons/fi";
+import { FaCircle, FaMoon, FaCircleMinus, FaCheck, FaFaceSmile, FaEraser } from "react-icons/fa6";
 import { setCustomStatus, clearPresence } from "@/lib/api";
 
 const presences = [
-  { value: "online", label: "Online", icon: FiCircle, color: "#22c55e" },
-  { value: "idle", label: "Idle", icon: FiMoon, color: "#eab308" },
-  { value: "dnd", label: "Do Not Disturb", icon: FiMinusCircle, color: "#ef4444" },
-  { value: "invisible", label: "Invisible", icon: FiCircle, color: "#52525b" },
+  { value: "online", label: "Online", icon: FaCircle, color: "#22c55e" },
+  { value: "idle", label: "Idle", icon: FaMoon, color: "#eab308" },
+  { value: "dnd", label: "Do not disturb", icon: FaCircleMinus, color: "#ef4444" },
+  { value: "invisible", label: "Invisible", icon: FaCircle, color: "#52525b" },
 ];
 
 const clearOptions = [
@@ -73,100 +73,98 @@ export default function StatusPage() {
   };
 
   return (
-    <div className="dash-page space-y-5 sm:space-y-6 pb-10">
-      <header className="dash-page-header mb-1 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="group flex items-center gap-2 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-zinc-600">
-            <FiCircle className="text-xs" />
-            Discord
-          </p>
-          <h1 className="mt-1 text-[clamp(1.85rem,4vw,2.75rem)] font-bold leading-none tracking-tight text-white">Status</h1>
-          <p className="mt-2 text-sm text-zinc-500">Presence and a static custom status shown at all times.</p>
-        </div>
-      </header>
+    <div className="animate-stagger">
+      <div className="page-heading">
+        <h1>Status</h1>
+        <p>Presence and a static custom status shown at all times.</p>
+      </div>
 
       {message && (
-        <div
-          className={`px-4 py-3 rounded-xl text-sm border ${
-            message.type === "error"
-              ? "bg-red-500/10 border-red-500/20 text-red-400"
-              : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-          }`}
-        >
-          {message.text}
+        <div className={`message ${message.type === "error" ? "message-error" : "message-success"}`} style={{ marginBottom: 20 }}>
+          <span>{message.text}</span>
         </div>
       )}
 
-      <section className="dash-card group/card p-4 sm:p-5">
-        <h2 className="text-sm font-semibold tracking-tight text-white/90">Presence</h2>
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {presences.map((p) => {
-            const Icon = p.icon;
-            const active = currentPresence === p.value;
-            return (
-              <button
-                key={p.value}
-                onClick={() => handleSetPresence(p.value)}
-                className="group/btn relative flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-left text-sm font-medium transition-all"
-                style={{
-                  background: active ? "rgba(255,255,255,0.04)" : "transparent",
-                  borderColor: active ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)",
-                  color: active ? "#ededf4" : "#a1a1aa",
-                }}
-              >
-                <Icon className="shrink-0 text-lg" style={{ color: p.color }} />
-                <span className="truncate">{p.label}</span>
-                {active && <FiCheck className="ml-auto shrink-0 text-xs text-zinc-500" />}
-              </button>
-            );
-          })}
+      <div className="page-section">
+        <div className="section-title">
+          <FaCircle style={{ fontSize: 10, opacity: 0.6 }} />
+          Presence
         </div>
-      </section>
+        <div className="card" style={{ padding: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 8 }}>
+            {presences.map((p) => {
+              const Icon = p.icon;
+              const active = currentPresence === p.value;
+              return (
+                <button
+                  key={p.value}
+                  onClick={() => handleSetPresence(p.value)}
+                  className={active ? "option-btn option-btn-active" : "option-btn"}
+                  style={{ padding: "12px 14px", justifyContent: "flex-start" }}
+                >
+                  <Icon style={{ fontSize: 16, color: p.color }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 500 }}>{p.label}</div>
+                  </div>
+                  {active && <FaCheck style={{ fontSize: 11, color: "var(--accent)" }} />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
-      <section className="dash-card group/card p-4 sm:p-5">
-        <h2 className="text-sm font-semibold tracking-tight text-white/90">Custom status</h2>
-        <div className="mt-4 space-y-3">
-          <input
-            className="dash-input"
-            value={customText}
-            onChange={(e) => setCustomText(e.target.value)}
-            placeholder="Enter status text"
-          />
-          <div className="flex items-center gap-3">
+      <div className="page-section">
+        <div className="section-title">
+          <FaFaceSmile style={{ fontSize: 12, opacity: 0.6 }} />
+          Custom status
+        </div>
+        <div className="card" style={{ padding: 20 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <input
-              className="dash-input w-32"
-              value={customEmoji}
-              onChange={(e) => setCustomEmoji(e.target.value)}
-              placeholder="Emoji"
+              value={customText}
+              onChange={(e) => setCustomText(e.target.value)}
+              placeholder="Enter status text"
+              style={{ width: "100%" }}
             />
-            <select
-              className="dash-input flex-1"
-              value={clearAfter}
-              onChange={(e) => setClearAfter(e.target.value)}
-            >
-              {clearOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2 pt-1">
-            <button
-              onClick={handleSetCustomStatus}
-              disabled={loading || !customText.trim()}
-              className="dash-btn-base h-9 px-4 text-sm dash-btn-v-primary"
-            >
-              Set status
-            </button>
-            <button
-              onClick={handleClear}
-              disabled={loading}
-              className="dash-btn-base h-9 px-4 text-sm dash-btn-v-ghost"
-            >
-              Clear
-            </button>
+            <div style={{ display: "flex", gap: 10 }}>
+              <input
+                value={customEmoji}
+                onChange={(e) => setCustomEmoji(e.target.value)}
+                placeholder="Emoji"
+                style={{ width: 140, flexShrink: 0 }}
+              />
+              <select
+                value={clearAfter}
+                onChange={(e) => setClearAfter(e.target.value)}
+                style={{ flex: 1 }}
+              >
+                {clearOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: "flex", gap: 8, paddingTop: 4 }}>
+              <button
+                onClick={handleSetCustomStatus}
+                disabled={loading || !customText.trim()}
+                className="btn btn-primary"
+              >
+                Set status
+              </button>
+              <button
+                onClick={handleClear}
+                disabled={loading}
+                className="btn btn-ghost"
+                style={{ color: "var(--danger)" }}
+              >
+                <FaEraser style={{ fontSize: 12 }} />
+                Clear
+              </button>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }
