@@ -125,7 +125,7 @@ function DashboardContent() {
   const connected = status?.connected ?? stats?.connected ?? false;
   const username = status?.username || stats?.username || "User";
   const avatar = status?.avatar_url || stats?.avatar || "";
-  const prefix = stats?.prefix || "-";
+  const prefix = status?.prefix || stats?.prefix || "-";
   const uptime = status?.uptime || stats?.uptime_display || "0m";
   const userCount = stats?.users ?? 0;
   const cmdCount = typeof cmds?.categories?.length === "number" ? cmds.categories.length : 0;
