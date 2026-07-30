@@ -41,6 +41,10 @@ export function getOnboardingStatus() {
   return request("/auth/onboarding/status");
 }
 
+export function restartInstance() {
+  return request("/instances/self/restart", { method: "POST" });
+}
+
 export function getStats() {
   return request("/stats");
 }

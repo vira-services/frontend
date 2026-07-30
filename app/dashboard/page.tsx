@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FaBorderAll, FaTerminal, FaCircle, FaClock, FaCheck } from "react-icons/fa6";
-import { getStats, getStatus, getCommands, completeOnboarding, getOnboardingStatus } from "@/lib/api";
+import { getStats, getStatus, getCommands, completeOnboarding, getOnboardingStatus, restartInstance } from "@/lib/api";
 
 function OnboardingModal({ onClose }: { onClose: () => void }) {
   const [token, setToken] = useState("");
@@ -90,19 +90,24 @@ function DashboardContent() {
 
     async function load() {
       try {
-        const [s, st, c, os] = await Promise.all([
+        const os = await getOnboardingStatus();
+
+        if (onboardingParam || !os.has_token || !os.token_valid) {
+          setShowOnboarding(true);
+        } else if (!os.connected) {
+          try {
+            await restartInstance();
+          } catch {}
+        }
+
+        const [s, st, c] = await Promise.all([
           getStats(),
           getStatus(),
           getCommands(),
-          getOnboardingStatus(),
         ]);
         setStats(s);
         setStatus(st);
         setCmds(c);
-
-        if (onboardingParam || !os.has_token || !os.token_valid) {
-          setShowOnboarding(true);
-        }
       } catch {}
       setLoading(false);
     }
