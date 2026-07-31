@@ -29,6 +29,15 @@ interface QuestRunner {
   last_message: string | null;
 }
 
+function runnerDescription(runner: QuestRunner) {
+  if (runner.phase === "working") return `Working on ${runner.current_quest_name || "a quest"}. Progress updates every few seconds.`;
+  if (runner.phase === "starting") return "Connecting to Discord and preparing the quest queue.";
+  if (runner.phase === "done") return "The latest pass finished. Start again to check for newly available quests.";
+  if (runner.phase === "error") return "The runner stopped because something went wrong. See the error below.";
+  if (runner.phase === "stopped" || runner.phase === "cancelled") return "The runner is stopped. No quests are being changed.";
+  return "Start the runner to enroll in and complete eligible quests automatically.";
+}
+
 interface QuestCounts {
   total: number;
   enrollable: number;
@@ -229,6 +238,10 @@ export default function QuestsPage() {
             </div>
           </div>
 
+          <p style={{ fontSize: 12.5, color: "var(--text-tertiary)", marginBottom: 16 }}>
+            {runnerDescription(runner)}
+          </p>
+
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
               <p style={{ fontSize: 12.5, color: "var(--text-tertiary)" }}>
@@ -294,6 +307,16 @@ export default function QuestsPage() {
               <span>{runner.last_error}</span>
             </div>
           )}
+          {runner.last_run_summary && !running && (
+            <div className="message message-info" style={{ marginTop: 16, marginBottom: 0 }}>
+              <span>
+                Last run: enrolled {Number(runner.last_run_summary.enrolled || 0)}, completed {Number(runner.last_run_summary.completed || 0)}
+                {Array.isArray(runner.last_run_summary.errors) && runner.last_run_summary.errors.length > 0
+                  ? `, ${runner.last_run_summary.errors.length} issue${runner.last_run_summary.errors.length === 1 ? "" : "s"}`
+                  : "."}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -305,9 +328,9 @@ export default function QuestsPage() {
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
           <StatCell label="Orb balance" value={counts.orb_balance} icon={<FaCoins style={{ fontSize: 11, color: "var(--accent)" }} />} />
           <StatCell label="Total quests" value={counts.total} icon={<FaTrophy style={{ fontSize: 11, color: "var(--accent)" }} />} />
-          <StatCell label="Enrollable" value={counts.enrollable} />
+          <StatCell label="Ready to enroll" value={counts.enrollable} />
           <StatCell label="In progress" value={counts.completeable} />
-          <StatCell label="Claimable" value={counts.claimable} />
+          <StatCell label="Ready to claim" value={counts.claimable} />
           <StatCell label="Worth finishing" value={counts.worthy_incomplete} />
         </div>
         {loading && (
