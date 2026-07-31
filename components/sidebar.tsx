@@ -96,9 +96,8 @@ export default function Sidebar() {
               style={{
                 width: 30,
                 height: 30,
-                borderRadius: 10,
+                borderRadius: "var(--radius-sm)",
                 objectFit: "cover",
-                boxShadow: "0 0 0 1px var(--border-active), 0 2px 10px rgba(255,95,200,0.18)",
               }}
             />
             <span className="min-w-0">
@@ -116,25 +115,14 @@ export default function Sidebar() {
                 <button
                   type="button"
                   onClick={() => toggleGroup(group.label)}
-                  className="mb-0.5 flex w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-left"
-                  style={{
-                    fontSize: 10.5,
-                    fontWeight: 600,
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    color: "var(--text-muted)",
-                    background: "transparent",
-                    transition: "color var(--transition-fast)",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+                  className="mb-0.5 flex w-full items-center rounded-lg px-2.5 py-1.5 text-left text-[10.5px] font-semibold tracking-[0.02em] text-[var(--text-muted)] hover:text-[var(--text-secondary)] justify-between"
                 >
-                  <span className="flex-1">{group.label}</span>
+                  <span>{group.label}</span>
                   <FaChevronDown
                     style={{
                       fontSize: 9,
                       color: "var(--text-tertiary)",
-                      transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                      transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
                       transform: isCollapsed ? "rotate(0deg)" : "rotate(180deg)",
                     }}
                   />
@@ -163,14 +151,13 @@ export default function Sidebar() {
                           display: "flex",
                           alignItems: "center",
                           gap: 10,
-                          padding: "8px 10px",
-                          borderRadius: 10,
+                          padding: "7px 10px",
+                          borderRadius: "var(--radius-sm)",
                           fontSize: 13,
-                          fontWeight: active ? 600 : 400,
-                          color: active ? "var(--accent)" : "var(--text-tertiary)",
+                          fontWeight: active ? 500 : 400,
+                          color: active ? "var(--text-primary)" : "var(--text-tertiary)",
                           textDecoration: "none",
-                          background: active ? "var(--accent-subtle)" : "transparent",
-                          boxShadow: active ? "inset 2px 0 0 var(--accent)" : "none",
+                          background: active ? "var(--bg-elevated)" : "transparent",
                           transition: "all var(--transition-fast)",
                           marginBottom: 1,
                         }}
@@ -279,7 +266,7 @@ export default function Sidebar() {
                 alt=""
                 width="32"
                 height="32"
-                style={{ borderRadius: "50%", objectFit: "cover", border: "1px solid var(--border-active)", flexShrink: 0 }}
+                style={{ borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
               />
             ) : (
               <div
@@ -313,7 +300,6 @@ export default function Sidebar() {
               >
                 {username}
               </p>
-              <p style={{ fontSize: 10.5, color: "var(--text-muted)", marginTop: 1 }}>selfbot</p>
             </div>
             <button
               type="button"
