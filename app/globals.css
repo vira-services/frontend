@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --bg-primary: #121419;
-  --bg-secondary: #181a1f;
-  --bg-tertiary: #1e2127;
-  --bg-elevated: #22252c;
-  --bg-card: #181a1f;
+  --bg-primary: #111112;
+  --bg-secondary: #17171a;
+  --bg-tertiary: #1c1c20;
+  --bg-elevated: #202025;
+  --bg-card: #17171a;
   --text-primary: #ece9f2;
   --text-secondary: #b6b2c2;
   --text-tertiary: #8a8696;
