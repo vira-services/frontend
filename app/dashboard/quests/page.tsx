@@ -26,6 +26,8 @@ interface QuestRunner {
   current_percent: number;
   last_error: string | null;
   last_run_summary: Record<string, any> | null;
+  recent_completed: Array<{ quest_id: number | string | null; quest_name: string; quest_type: string | null }>;
+  skipped_quests: Array<{ quest_id: number | string | null; quest_name: string; quest_type: string | null }>;
   last_message: string | null;
 }
 
@@ -86,6 +88,8 @@ const EMPTY_COUNTS: QuestCounts = {
     current_percent: 0,
     last_error: null,
     last_run_summary: null,
+    recent_completed: [],
+    skipped_quests: [],
     last_message: null,
   },
   api_error: null,
@@ -293,6 +297,39 @@ export default function QuestsPage() {
                     +{runner.queued_names.length - 20} more
                   </span>
                 )}
+              </div>
+            </div>
+          )}
+
+          {runner.recent_completed && runner.recent_completed.length > 0 && (
+            <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>Completed this run</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {runner.recent_completed.map((quest, i) => (
+                  <div key={`${quest.quest_id ?? quest.quest_name}-${i}`} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5 }}>
+                    <FaTrophy style={{ color: "var(--accent)", fontSize: 11, flexShrink: 0 }} />
+                    <span style={{ color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{quest.quest_name}</span>
+                    {quest.quest_type && <span className="badge badge-success" style={{ fontSize: 10, marginLeft: "auto" }}>{quest.quest_type}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {runner.skipped_quests && runner.skipped_quests.length > 0 && (
+            <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>Skipped automatically</p>
+              <p style={{ fontSize: 11.5, color: "var(--text-tertiary)", marginBottom: 8 }}>
+                These quests need in-game or unsupported actions, so they will not be enrolled or retried.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {runner.skipped_quests.slice(0, 10).map((quest, i) => (
+                  <div key={`${quest.quest_id ?? quest.quest_name}-${i}`} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5 }}>
+                    <FaForward style={{ color: "var(--text-muted)", fontSize: 11, flexShrink: 0 }} />
+                    <span style={{ color: "var(--text-tertiary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{quest.quest_name}</span>
+                    {quest.quest_type && <span className="badge badge-warning" style={{ fontSize: 10, marginLeft: "auto" }}>{quest.quest_type}</span>}
+                  </div>
+                ))}
               </div>
             </div>
           )}
