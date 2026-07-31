@@ -83,13 +83,6 @@ export function saveRotatorConfig(config: any) {
   });
 }
 
-export function setPresence(status: string) {
-  return request("/presence", {
-    method: "POST",
-    body: JSON.stringify({ status }),
-  });
-}
-
 export function setRichPresence(data: any) {
   return request("/rpc/set-rich-presence", {
     method: "POST",
@@ -112,13 +105,6 @@ export function getPlatforms() {
   return request("/platforms");
 }
 
-export function loginUser(token: string) {
-  return request("/login", {
-    method: "POST",
-    body: JSON.stringify({ token }),
-  });
-}
-
 export function logoutUser() {
   return request("/logout", { method: "POST" });
 }
@@ -131,22 +117,8 @@ export function getModuleSettings() {
   return request("/modules/settings");
 }
 
-export function updateModuleSettings(data: any) {
-  return request("/modules/settings", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}
-
 export function getPresenceSettings() {
   return request("/presence/settings");
-}
-
-export function savePresenceSettings(data: any) {
-  return request("/presence/settings/save", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
 }
 
 export function setRpcEnabled(enabled: boolean) {
@@ -156,15 +128,22 @@ export function setRpcEnabled(enabled: boolean) {
   });
 }
 
-export function getStackables() {
-  return request("/presence/stackables");
+// ---- Quests ----
+
+export function getQuestsStatus() {
+  return request("/quests/status");
 }
 
-export function saveStackables(data: any) {
-  return request("/presence/stackables", {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
+export function startQuests() {
+  return request("/quests/start", { method: "POST" });
+}
+
+export function stopQuests() {
+  return request("/quests/stop", { method: "POST" });
+}
+
+export function skipQuests() {
+  return request("/quests/skip", { method: "POST" });
 }
 
 // ---- Bot management ----

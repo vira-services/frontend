@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FaCheck, FaFaceSmile, FaEraser, FaSignal } from "react-icons/fa6";
-import { setCustomStatus, clearPresence } from "@/lib/api";
+import { setCustomStatus, clearPresence, updateStatus } from "@/lib/api";
 
 const presences = [
   { value: "online", label: "Online", image: "https://i.imgur.com/QU35DxI.png" },
@@ -31,11 +31,7 @@ export default function StatusPage() {
   const handleSetPresence = async (status: string) => {
     setCurrentPresence(status);
     try {
-      await fetch(`/api/presence`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
+      await updateStatus(status);
     } catch {}
   };
 

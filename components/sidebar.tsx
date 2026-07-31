@@ -17,6 +17,7 @@ import {
   FaUser,
   FaGear,
   FaEllipsisVertical,
+  FaListCheck,
 } from "react-icons/fa6";
 import { logoutUser, getStatus } from "@/lib/api";
 
@@ -55,6 +56,7 @@ const navGroups: NavGroup[] = [
           { label: "Rotator", path: "/dashboard/rotator", Icon: FaRotate },
           { label: "Status", path: "/dashboard/status", Icon: FaCircle },
           { label: "Rich presence", path: "/dashboard/rpc", Icon: FaGamepad },
+          { label: "Quests", path: "/dashboard/quests", Icon: FaListCheck },
         ],
       },
       {
