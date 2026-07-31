@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaCompactDisc, FaEraser, FaFloppyDisk } from "react-icons/fa6";
-import { setRichPresence, clearPresence, getPlatforms, getPresenceSettings, savePresenceSettings, getModuleSettings, setRpcEnabled } from "@/lib/api";
+import { FaCompactDisc, FaEraser } from "react-icons/fa6";
+import { setRichPresence, clearPresence, getPlatforms, getPresenceSettings, getModuleSettings, setRpcEnabled } from "@/lib/api";
 
 const activityTypes = [
   { value: 0, label: "Playing" },
@@ -84,28 +84,7 @@ export default function RpcPage() {
       const payload = buildPayload(form);
       if (!payload.name) payload.name = " ";
       await setRichPresence(payload);
-      await savePresenceSettings(payload);
-      setMessage("Rich presence set and saved!");
-    } catch (e: any) {
-      setMessage(`Error: ${e.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSave = async () => {
-    setLoading(true);
-    setMessage("");
-    try {
-      const payload = buildPayload(form);
-      await savePresenceSettings(payload);
-      if (enabled) {
-        if (!payload.name) payload.name = " ";
-        await setRichPresence(payload);
-        setMessage("Saved to database and applied");
-      } else {
-        setMessage("Saved to database");
-      }
+      setMessage("Rich presence set and saved");
     } catch (e: any) {
       setMessage(`Error: ${e.message}`);
     } finally {
@@ -137,7 +116,7 @@ export default function RpcPage() {
         setMessage(
           res?.outcome === "restored"
             ? "Rich presence enabled and applied from your saved settings"
-            : "Rich presence enabled — set a presence or hit Save to apply it"
+            : "Rich presence enabled — set a presence to apply it"
         );
       } else {
         setMessage("Rich presence disabled");
@@ -293,10 +272,6 @@ export default function RpcPage() {
           <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
             <button onClick={handleSetPresence} disabled={loading || !enabled} className="btn btn-primary">
               {loading ? "Sending..." : "Set presence"}
-            </button>
-            <button onClick={handleSave} disabled={loading || !enabled} className="btn btn-ghost">
-              <FaFloppyDisk style={{ fontSize: 12 }} />
-              Save
             </button>
             <button onClick={handleClear} disabled={loading} className="btn btn-ghost" style={{ color: "var(--danger)" }}>
               <FaEraser style={{ fontSize: 12 }} />
