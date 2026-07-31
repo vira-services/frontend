@@ -2,10 +2,11 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 async function request(path: string, options: RequestInit = {}) {
   const token = typeof window !== "undefined" ? localStorage.getItem("vira_jwt") : null;
+  const isForm = typeof FormData !== "undefined" && options.body instanceof FormData;
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     ...((options.headers as Record<string, string>) || {}),
   };
+  if (!isForm) headers["Content-Type"] = "application/json";
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
@@ -47,10 +48,6 @@ export function restartInstance() {
 
 export function getStats() {
   return request("/stats");
-}
-
-export function getCommands() {
-  return request("/commands");
 }
 
 export function getStatus() {
@@ -191,4 +188,24 @@ export function removeBot(botId: number) {
 
 export function reconnectBot(botId: number) {
   return request(`/bots/${botId}/reconnect`, { method: "POST" });
+}
+
+export function updateBot(botId: number, data: { accent_color?: string | null; thumbnail_url?: string | null }) {
+  return request(`/bots/${botId}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export function setBotAvatar(botId: number, file: File) {
+  const token = typeof window !== "undefined" ? localStorage.getItem("vira_jwt") : null;
+  const form = new FormData();
+  form.append("file", file);
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return request(`/bots/${botId}/avatar`, {
+    method: "POST",
+    body: form,
+    headers,
+  });
 }

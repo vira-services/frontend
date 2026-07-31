@@ -2,8 +2,8 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FaBorderAll, FaTerminal, FaCircle, FaClock, FaCheck } from "react-icons/fa6";
-import { getStats, getStatus, getCommands, completeOnboarding, getOnboardingStatus, restartInstance } from "@/lib/api";
+import { FaBorderAll, FaCircle, FaClock, FaRobot, FaCompactDisc, FaGear, FaChevronRight } from "react-icons/fa6";
+import { getStats, getStatus, completeOnboarding, getOnboardingStatus, restartInstance } from "@/lib/api";
 
 function OnboardingModal({ onClose }: { onClose: () => void }) {
   const [token, setToken] = useState("");
@@ -81,7 +81,6 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const [stats, setStats] = useState<any>(null);
   const [status, setStatus] = useState<any>(null);
-  const [cmds, setCmds] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -92,7 +91,7 @@ function DashboardContent() {
       try {
         const os = await getOnboardingStatus();
 
-        if (onboardingParam || !os.has_token || !os.token_valid) {
+        if (onboardingParam || !os.has_token) {
           setShowOnboarding(true);
         } else if (!os.connected) {
           try {
@@ -100,14 +99,12 @@ function DashboardContent() {
           } catch {}
         }
 
-        const [s, st, c] = await Promise.all([
+        const [s, st] = await Promise.all([
           getStats(),
           getStatus(),
-          getCommands(),
         ]);
         setStats(s);
         setStatus(st);
-        setCmds(c);
       } catch {}
       setLoading(false);
     }
@@ -125,15 +122,12 @@ function DashboardContent() {
   const connected = status?.connected ?? stats?.connected ?? false;
   const username = status?.username || stats?.username || "User";
   const avatar = status?.avatar_url || stats?.avatar || "";
-  const prefix = status?.prefix || stats?.prefix || "-";
   const uptime = status?.uptime || stats?.uptime_display || "0m";
   const userCount = stats?.users ?? 0;
-  const cmdCount = typeof cmds?.categories?.length === "number" ? cmds.categories.length : 0;
 
   const shortcuts = [
-    { label: "Commands", href: "/dashboard/commands", icon: FaTerminal, desc: "Browse available commands" },
+    { label: "Customize", href: "/dashboard/customize", icon: FaRobot, desc: "Manage bots & appearance" },
     { label: "Rich presence", href: "/dashboard/rpc", icon: FaCompactDisc, desc: "Set your custom activity" },
-    { label: "Webhook", href: "/dashboard/webhook", icon: FaPaperPlane, desc: "Configure command output" },
     { label: "Settings", href: "/dashboard/settings", icon: FaGear, desc: "Account & preferences" },
   ];
 
@@ -179,18 +173,10 @@ function DashboardContent() {
 
               <div className="card" style={{ padding: "18px 20px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-tertiary)" }}>Prefix</span>
-                  <FaTerminal style={{ fontSize: 12, color: "var(--text-muted)" }} />
+                  <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-tertiary)" }}>Users</span>
+                  <FaCircle style={{ fontSize: 10, color: "var(--text-muted)" }} />
                 </div>
-                <p style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.1, fontFamily: "monospace" }}>{prefix}</p>
-              </div>
-
-              <div className="card" style={{ padding: "18px 20px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, fontWeight: 500, color: "var(--text-tertiary)" }}>Categories</span>
-                  <FaBorderAll style={{ fontSize: 12, color: "var(--text-muted)" }} />
-                </div>
-                <p style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.1 }}>{cmdCount}</p>
+                <p style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.1 }}>{userCount}</p>
               </div>
             </div>
           </div>
@@ -216,7 +202,6 @@ function DashboardContent() {
                       <span style={{ width: 5, height: 5, borderRadius: "50%", background: connected ? "var(--success)" : "var(--text-muted)" }} />
                       {connected ? "Connected" : "Disconnected"}
                     </span>
-                    <span style={{ fontSize: 11, color: "var(--text-muted)" }}>prefix: {prefix}</span>
                   </div>
                 </div>
               </div>
@@ -254,8 +239,6 @@ function DashboardContent() {
     </>
   );
 }
-
-import { FaCompactDisc, FaPaperPlane, FaGear, FaChevronRight } from "react-icons/fa6";
 
 export default function DashboardPage() {
   return (

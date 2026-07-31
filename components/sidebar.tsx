@@ -2,7 +2,7 @@
 
 import { useState, type ComponentType, type SVGProps } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { FaBorderAll, FaDesktop, FaRotate, FaCircle, FaCompactDisc, FaPaperPlane, FaTerminal, FaBolt, FaRightFromBracket, FaChevronDown } from "react-icons/fa6";
+import { FaBorderAll, FaDesktop, FaRotate, FaCircle, FaCompactDisc, FaRobot, FaRightFromBracket, FaChevronDown } from "react-icons/fa6";
 import { logoutUser } from "@/lib/api";
 
 interface NavGroup {
@@ -29,19 +29,7 @@ const navGroups: NavGroup[] = [
   {
     label: "Modules",
     items: [
-      { label: "Webhook", path: "/dashboard/webhook", Icon: FaPaperPlane },
-    ],
-  },
-  {
-    label: "Extras",
-    items: [
-      { label: "Commands", path: "/dashboard/commands", Icon: FaTerminal },
-    ],
-  },
-  {
-    label: "Bot",
-    items: [
-      { label: "Customize", path: "/dashboard/customize", Icon: FaBolt },
+      { label: "Customize", path: "/dashboard/customize", Icon: FaRobot },
     ],
   },
 ];
