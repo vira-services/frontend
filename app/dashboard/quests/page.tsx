@@ -9,7 +9,6 @@ import {
   FaTrophy,
   FaCircleNodes,
   FaCoins,
-  FaCircleInfo,
   FaTriangleExclamation,
 } from "react-icons/fa6";
 import { getQuestsStatus, startQuests, stopQuests, skipQuests } from "@/lib/api";
@@ -103,6 +102,7 @@ export default function QuestsPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: string; text: string } | null>(null);
+  const [lastChecked, setLastChecked] = useState<Date | null>(null);
 
   const runner = status.counts?.runner ?? EMPTY_COUNTS.runner;
   const counts = status.counts ?? EMPTY_COUNTS;
@@ -114,6 +114,7 @@ export default function QuestsPage() {
     try {
       const data = await getQuestsStatus();
       if (data?.counts) setStatus(data);
+      setLastChecked(new Date());
     } catch {
       // keep last known state on transient errors
     } finally {
@@ -123,9 +124,9 @@ export default function QuestsPage() {
 
   useEffect(() => {
     fetchStatus();
-    const timer = setInterval(fetchStatus, 4000);
+    const timer = setInterval(fetchStatus, running ? 4000 : 10000);
     return () => clearInterval(timer);
-  }, [fetchStatus]);
+  }, [fetchStatus, running]);
 
   const act = async (label: string, fn: () => Promise<any>, successMsg: string) => {
     setBusy(label);
@@ -312,11 +313,16 @@ export default function QuestsPage() {
         {loading && (
           <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 14 }}>Loading quest data...</p>
         )}
-        {counts.debug && counts.debug.length > 0 && (
-          <div className="message message-info" style={{ marginTop: 16, marginBottom: 0 }}>
-            <FaCircleInfo style={{ fontSize: 12 }} />
-            <span>{counts.debug.join(" · ")}</span>
+        {counts.api_error && status.connected && (
+          <div className="message message-warning" style={{ marginTop: 16, marginBottom: 0 }}>
+            <FaTriangleExclamation style={{ fontSize: 12 }} />
+            <span>Quest data is temporarily unavailable: {counts.api_error}</span>
           </div>
+        )}
+        {lastChecked && (
+          <p style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 12 }}>
+            Updated {lastChecked.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" })}
+          </p>
         )}
         {!status.connected && counts.api_error && (
           <div className="message message-warning" style={{ marginTop: 16, marginBottom: 0 }}>
