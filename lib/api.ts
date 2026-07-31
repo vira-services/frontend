@@ -68,12 +68,10 @@ export function getDevicePresets() {
   return request("/device/presets");
 }
 
-export function setDevicePreset(preset: string, enabled?: boolean) {
-  const body: any = { preset };
-  if (enabled !== undefined) body.enabled = enabled;
+export function setDevicePreset(preset: string) {
   return request("/device/preset", {
     method: "POST",
-    body: JSON.stringify(body),
+    body: JSON.stringify({ preset }),
   });
 }
 

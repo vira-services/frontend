@@ -43,7 +43,7 @@ function buildPayload(form: any) {
 
 export default function RpcPage() {
   const [form, setForm] = useState(defaultForm);
-  const [enabled, setEnabled] = useState(true);
+  const [enabled, setEnabled] = useState<boolean | null>(null);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [platforms, setPlatforms] = useState<any>(null);
@@ -72,7 +72,7 @@ export default function RpcPage() {
       .then((m) => {
         if (m && typeof m.rpc_enabled === "boolean") setEnabled(m.rpc_enabled);
       })
-      .catch(() => {});
+      .catch(() => setEnabled(false));
   }, []);
 
   const setField = (field: string, value: any) => setForm((f) => ({ ...f, [field]: value }));
@@ -97,8 +97,15 @@ export default function RpcPage() {
     setLoading(true);
     setMessage("");
     try {
-      await savePresenceSettings(buildPayload(form));
-      setMessage("Saved to database");
+      const payload = buildPayload(form);
+      await savePresenceSettings(payload);
+      if (enabled) {
+        if (!payload.name) payload.name = " ";
+        await setRichPresence(payload);
+        setMessage("Saved to database and applied");
+      } else {
+        setMessage("Saved to database");
+      }
     } catch (e: any) {
       setMessage(`Error: ${e.message}`);
     } finally {
@@ -124,9 +131,17 @@ export default function RpcPage() {
     setLoading(true);
     setMessage("");
     try {
-      await setRpcEnabled(next);
+      const res = await setRpcEnabled(next);
       setEnabled(next);
-      setMessage(next ? "Rich presence enabled. Saved settings will be applied." : "Rich presence disabled");
+      if (next) {
+        setMessage(
+          res?.outcome === "restored"
+            ? "Rich presence enabled and applied from your saved settings"
+            : "Rich presence enabled — set a presence or hit Save to apply it"
+        );
+      } else {
+        setMessage("Rich presence disabled");
+      }
     } catch (e: any) {
       setMessage(`Error: ${e.message}`);
     } finally {
@@ -165,15 +180,15 @@ export default function RpcPage() {
               </p>
             </div>
             <button
-              onClick={() => handleToggle(!enabled)}
-              disabled={loading}
+              onClick={() => { if (enabled !== null) handleToggle(!enabled); }}
+              disabled={loading || enabled === null}
               className={`toggle ${enabled ? "toggle-on" : "toggle-off"}`}
             >
               <span className="toggle-knob" />
             </button>
           </div>
 
-          {!enabled && (
+          {enabled === false && (
             <div className="message message-warning" style={{ marginBottom: 20 }}>
               <span>Rich presence is disabled. Configure your activity and enable it when ready.</span>
             </div>
