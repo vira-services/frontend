@@ -219,7 +219,7 @@ export default function Sidebar() {
       style={{
         width: "var(--sidebar-w)",
         borderRight: "1px solid var(--border)",
-        background: "var(--bg-secondary)",
+        background: "var(--bg-primary)",
       }}
     >
       <div className="relative z-[1] flex h-full flex-col">
