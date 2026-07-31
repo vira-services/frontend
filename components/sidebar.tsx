@@ -7,7 +7,7 @@ import {
   FaDesktop,
   FaRotate,
   FaCircle,
-  FaCompactDisc,
+  FaMusic,
   FaRobot,
   FaRightFromBracket,
   FaChevronDown,
@@ -17,11 +17,19 @@ import {
 } from "react-icons/fa6";
 import { logoutUser, getStatus } from "@/lib/api";
 
-interface NavItem {
+interface NavLeaf {
   label: string;
   path: string;
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
 }
+
+interface NavSub {
+  label: string;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  sub: NavLeaf[];
+}
+
+type NavItem = NavLeaf | NavSub;
 
 interface NavGroup {
   label: string;
@@ -36,11 +44,16 @@ const navGroups: NavGroup[] = [
   {
     label: "Modules",
     items: [
-      { label: "Account", path: "/dashboard/account", Icon: FaUser },
-      { label: "Device", path: "/dashboard/device", Icon: FaDesktop },
-      { label: "Rotator", path: "/dashboard/rotator", Icon: FaRotate },
-      { label: "Status", path: "/dashboard/status", Icon: FaCircle },
-      { label: "Rich presence", path: "/dashboard/rpc", Icon: FaCompactDisc },
+      {
+        label: "Account",
+        Icon: FaUser,
+        sub: [
+          { label: "Device", path: "/dashboard/device", Icon: FaDesktop },
+          { label: "Rotator", path: "/dashboard/rotator", Icon: FaRotate },
+          { label: "Status", path: "/dashboard/status", Icon: FaCircle },
+          { label: "Rich presence", path: "/dashboard/rpc", Icon: FaMusic },
+        ],
+      },
       { label: "Customize", path: "/dashboard/customize", Icon: FaRobot },
     ],
   },
@@ -50,6 +63,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [subCollapsed, setSubCollapsed] = useState<Record<string, boolean>>({});
   const [menuOpen, setMenuOpen] = useState(false);
   const [username, setUsername] = useState("User");
   const [avatar, setAvatar] = useState<string | null>(null);
@@ -68,6 +82,10 @@ export default function Sidebar() {
     setCollapsed((prev) => ({ ...prev, [label]: !prev[label] }));
   };
 
+  const toggleSub = (label: string) => {
+    setSubCollapsed((prev) => ({ ...prev, [label]: !prev[label] }));
+  };
+
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -76,7 +94,109 @@ export default function Sidebar() {
     router.push("/login");
   };
 
-  const activeItem = (item: NavItem) => pathname === item.path;
+  const renderLeaf = (item: NavLeaf, indent: boolean) => {
+    const active = pathname === item.path;
+    const Icon = item.Icon;
+    return (
+      <a
+        key={item.path}
+        href={item.path}
+        onClick={(e) => {
+          e.preventDefault();
+          setMenuOpen(false);
+          router.push(item.path);
+        }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "7px 10px",
+          paddingLeft: indent ? 26 : 10,
+          borderRadius: "var(--radius-sm)",
+          fontSize: 13,
+          fontWeight: active ? 500 : 400,
+          color: active ? "var(--text-primary)" : "var(--text-tertiary)",
+          textDecoration: "none",
+          background: active ? "var(--bg-elevated)" : "transparent",
+          transition: "all var(--transition-fast)",
+          marginBottom: 1,
+        }}
+        onMouseEnter={(e) => {
+          if (!active) {
+            e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+            e.currentTarget.style.color = "var(--text-secondary)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!active) {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "var(--text-tertiary)";
+          }
+        }}
+      >
+        <Icon style={{ fontSize: 14, flexShrink: 0, opacity: active ? 1 : 0.5 }} />
+        <span className="overflow-hidden whitespace-nowrap">{item.label}</span>
+      </a>
+    );
+  };
+
+  const renderSub = (item: NavSub) => {
+    const Icon = item.Icon;
+    const isCollapsed = subCollapsed[item.label];
+    const active = item.sub.some((s) => pathname === s.path);
+    return (
+      <div key={item.label}>
+        <button
+          type="button"
+          onClick={() => toggleSub(item.label)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            width: "100%",
+            padding: "7px 10px",
+            borderRadius: "var(--radius-sm)",
+            fontSize: 13,
+            fontWeight: active ? 500 : 400,
+            color: active ? "var(--text-secondary)" : "var(--text-tertiary)",
+            background: "transparent",
+            textAlign: "left",
+            transition: "all var(--transition-fast)",
+            marginBottom: 1,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+            e.currentTarget.style.color = "var(--text-secondary)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = active ? "var(--text-secondary)" : "var(--text-tertiary)";
+          }}
+        >
+          <Icon style={{ fontSize: 14, flexShrink: 0, opacity: active ? 0.8 : 0.5 }} />
+          <span className="flex-1 overflow-hidden whitespace-nowrap">{item.label}</span>
+          <FaChevronDown
+            style={{
+              fontSize: 9,
+              color: "var(--text-tertiary)",
+              transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              transform: isCollapsed ? "rotate(0deg)" : "rotate(180deg)",
+            }}
+          />
+        </button>
+        <div
+          style={{
+            overflow: "hidden",
+            transition: "max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease",
+            maxHeight: isCollapsed ? 0 : 220,
+            opacity: isCollapsed ? 0 : 1,
+          }}
+        >
+          {item.sub.map((leaf) => renderLeaf(leaf, true))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <aside
@@ -121,7 +241,6 @@ export default function Sidebar() {
                   <FaChevronDown
                     style={{
                       fontSize: 9,
-                      color: "var(--text-tertiary)",
                       transition: "transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)",
                       transform: isCollapsed ? "rotate(0deg)" : "rotate(180deg)",
                     }}
@@ -130,55 +249,12 @@ export default function Sidebar() {
                 <div
                   style={{
                     overflow: "hidden",
-                    transition: "max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease",
+                    transition: "max-height 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease",
                     maxHeight: isCollapsed ? 0 : 320,
                     opacity: isCollapsed ? 0 : 1,
                   }}
                 >
-                  {group.items.map((item) => {
-                    const active = activeItem(item);
-                    const Icon = item.Icon;
-                    return (
-                      <a
-                        key={item.path}
-                        href={item.path}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setMenuOpen(false);
-                          router.push(item.path);
-                        }}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                          padding: "7px 10px",
-                          borderRadius: "var(--radius-sm)",
-                          fontSize: 13,
-                          fontWeight: active ? 500 : 400,
-                          color: active ? "var(--text-primary)" : "var(--text-tertiary)",
-                          textDecoration: "none",
-                          background: active ? "var(--bg-elevated)" : "transparent",
-                          transition: "all var(--transition-fast)",
-                          marginBottom: 1,
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!active) {
-                            e.currentTarget.style.background = "var(--bg-elevated)";
-                            e.currentTarget.style.color = "var(--text-secondary)";
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!active) {
-                            e.currentTarget.style.background = "transparent";
-                            e.currentTarget.style.color = "var(--text-tertiary)";
-                          }
-                        }}
-                      >
-                        <Icon style={{ fontSize: 14, flexShrink: 0, opacity: active ? 1 : 0.55 }} />
-                        <span className="overflow-hidden whitespace-nowrap">{item.label}</span>
-                      </a>
-                    );
-                  })}
+                  {group.items.map((item) => ("sub" in item ? renderSub(item) : renderLeaf(item, false)))}
                 </div>
               </div>
             );
