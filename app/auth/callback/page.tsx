@@ -45,7 +45,7 @@ export default function CallbackPage() {
         <div style={{ textAlign: "center", padding: "40px", background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)" }}>
           <h2 style={{ color: "var(--danger)", marginBottom: 12 }}>Authentication Failed</h2>
           <p style={{ color: "var(--text-secondary)", marginBottom: 20 }}>{error}</p>
-          <button onClick={() => router.push("/")} style={{ background: "var(--accent)", color: "#fff", padding: "10px 24px" }}>
+          <button onClick={() => router.push("/login")} style={{ background: "var(--accent)", color: "#fff", padding: "10px 24px" }}>
             Try Again
           </button>
         </div>

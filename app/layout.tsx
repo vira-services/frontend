@@ -10,8 +10,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Vira - Dashboard",
-  description: "Vira selfbot control panel",
+  title: "Vira",
+  description: "",
 };
 
 export default function RootLayout({

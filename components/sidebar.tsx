@@ -60,7 +60,7 @@ export default function Sidebar() {
       await logoutUser();
     } catch {}
     localStorage.removeItem("vira_jwt");
-    router.push("/");
+    router.push("/login");
   };
 
   return (
