@@ -2,7 +2,7 @@
 
 import { useState, type ComponentType, type SVGProps } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { FaBorderAll, FaDesktop, FaRotate, FaCircle, FaCompactDisc, FaRobot, FaRightFromBracket, FaChevronDown } from "react-icons/fa6";
+import { FaBorderAll, FaDesktop, FaRotate, FaCircle, FaCompactDisc, FaRobot, FaRightFromBracket, FaChevronDown, FaUser } from "react-icons/fa6";
 import { logoutUser } from "@/lib/api";
 
 interface NavGroup {
@@ -18,17 +18,13 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "Discord",
+    label: "Modules",
     items: [
+      { label: "Account", path: "/dashboard/account", Icon: FaUser },
       { label: "Device", path: "/dashboard/device", Icon: FaDesktop },
       { label: "Rotator", path: "/dashboard/rotator", Icon: FaRotate },
       { label: "Status", path: "/dashboard/status", Icon: FaCircle },
       { label: "Rich presence", path: "/dashboard/rpc", Icon: FaCompactDisc },
-    ],
-  },
-  {
-    label: "Modules",
-    items: [
       { label: "Customize", path: "/dashboard/customize", Icon: FaRobot },
     ],
   },
@@ -53,16 +49,11 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="pointer-events-auto fixed z-40 hidden flex-col overflow-visible transition-all duration-300 md:flex"
+      className="pointer-events-auto fixed inset-y-0 left-0 z-40 hidden flex-col overflow-visible transition-all duration-300 md:flex"
       style={{
-        top: "var(--sidebar-inset)",
-        bottom: "var(--sidebar-inset)",
-        left: "var(--sidebar-inset)",
-        borderRadius: "var(--radius-xl)",
         width: "var(--sidebar-w)",
-        border: "1px solid var(--border)",
+        borderRight: "1px solid var(--border)",
         background: "var(--bg-secondary)",
-        boxShadow: "var(--shadow-elevated)",
       }}
     >
       <div className="relative z-[1] flex h-full flex-col">
@@ -108,7 +99,7 @@ export default function Sidebar() {
                   style={{
                     overflow: "hidden",
                     transition: "max-height 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease",
-                    maxHeight: isCollapsed ? 0 : 200,
+                    maxHeight: isCollapsed ? 0 : 280,
                     opacity: isCollapsed ? 0 : 1,
                   }}
                 >

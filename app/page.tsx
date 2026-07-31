@@ -2,14 +2,56 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
 import { CiLogin } from "react-icons/ci";
 import { IoSparklesSharp } from "react-icons/io5";
+import { FaSpinner } from "react-icons/fa6";
 
 import Ferrofluid from "@/components/ferrofluid";
 import { Safari } from "@/registry/magicui/safari";
+import { getOnboardingStatus, getStatus } from "@/lib/api";
+
+type AuthState =
+  | { kind: "loading" }
+  | { kind: "login" }
+  | { kind: "profile"; username: string; avatar: string | null };
 
 function LandingNavbar() {
+  const router = useRouter();
+  const [auth, setAuth] = useState<AuthState>({ kind: "loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+    async function check() {
+      try {
+        const token = localStorage.getItem("vira_jwt");
+        if (!token) {
+          if (!cancelled) setAuth({ kind: "login" });
+          return;
+        }
+        const os = await getOnboardingStatus().catch(() => null);
+        if (os?.has_token && os.token_valid === false) {
+          if (!cancelled) setAuth({ kind: "login" });
+          return;
+        }
+        const st = await getStatus().catch(() => null);
+        if (cancelled) return;
+        setAuth({
+          kind: "profile",
+          username: st?.username || localStorage.getItem("vira_username") || "User",
+          avatar: st?.avatar_url || null,
+        });
+      } catch {
+        if (!cancelled) setAuth({ kind: "login" });
+      }
+    }
+    check();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <nav
       aria-label="Main navigation"
@@ -28,13 +70,45 @@ function LandingNavbar() {
           Features
         </Link>
 
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-semibold text-zinc-900 shadow-[0_4px_16px_rgba(255,255,255,0.12)] transition-transform duration-200 hover:scale-[1.03]"
-        >
-          <CiLogin className="text-lg" aria-hidden="true" />
-          Login
-        </Link>
+        {auth.kind === "loading" && (
+          <span className="inline-flex h-8 w-[110px] items-center justify-center rounded-full border border-white/10 bg-white/5">
+            <FaSpinner className="size-3.5 animate-spin text-white/50" aria-hidden="true" />
+          </span>
+        )}
+
+        {auth.kind === "login" && (
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-semibold text-zinc-900 shadow-[0_4px_16px_rgba(255,255,255,0.12)] transition-transform duration-200 hover:scale-[1.03]"
+          >
+            <CiLogin className="text-lg" aria-hidden="true" />
+            Login
+          </Link>
+        )}
+
+        {auth.kind === "profile" && (
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard")}
+            title="Open dashboard"
+            className="inline-flex max-w-[180px] items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1.5 pl-1.5 pr-3.5 text-xs font-semibold text-white transition-transform duration-200 hover:scale-[1.03] hover:border-white/30"
+          >
+            {auth.avatar ? (
+              <img
+                src={auth.avatar}
+                alt=""
+                width={24}
+                height={24}
+                className="size-6 rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex size-6 items-center justify-center rounded-full bg-[#E04CC8] text-[11px] font-bold text-white">
+                {auth.username[0]?.toUpperCase() || "?"}
+              </span>
+            )}
+            <span className="max-w-[110px] truncate">{auth.username}</span>
+          </button>
+        )}
       </div>
     </nav>
   );

@@ -3,18 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --bg-primary: #0b0b0e;
-  --bg-secondary: #101014;
-  --bg-tertiary: #16161b;
-  --bg-elevated: #1c1c23;
-  --bg-card: #121216;
-  --text-primary: #e8e8ed;
-  --text-secondary: #a0a0ab;
-  --text-tertiary: #6b6b78;
-  --text-muted: #4a4a54;
-  --border: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(255, 255, 255, 0.1);
-  --border-active: rgba(255, 255, 255, 0.14);
+  --bg-primary: #040406;
+  --bg-secondary: #09090d;
+  --bg-tertiary: #0e0e14;
+  --bg-elevated: #14141c;
+  --bg-card: #0a0a10;
+  --text-primary: #f2eef6;
+  --text-secondary: #b3aac4;
+  --text-tertiary: #7a718a;
+  --text-muted: #524a60;
+  --border: rgba(226, 85, 184, 0.1);
+  --border-hover: rgba(226, 85, 184, 0.22);
+  --border-active: rgba(226, 85, 184, 0.35);
   --success: #22c55e;
   --success-bg: rgba(34, 197, 94, 0.08);
   --success-border: rgba(34, 197, 94, 0.15);
@@ -24,19 +24,19 @@
   --warning: #f59e0b;
   --warning-bg: rgba(245, 158, 11, 0.08);
   --warning-border: rgba(245, 158, 11, 0.15);
-  --accent: #e255b8;
-  --accent-hover: #d640a8;
-  --accent-subtle: rgba(226, 85, 184, 0.1);
-  --accent-border: rgba(226, 85, 184, 0.2);
+  --accent: #ff5fc8;
+  --accent-hover: #ff78d3;
+  --accent-subtle: rgba(255, 95, 200, 0.1);
+  --accent-border: rgba(255, 95, 200, 0.28);
   --sidebar-w: 248px;
   --sidebar-inset: 10px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-popover: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-elevated: 0 4px 14px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-popover: 0 8px 32px rgba(0, 0, 0, 0.65);
   --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-base: 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -45,6 +45,10 @@
 
 body {
   background-color: var(--bg-primary);
+  background-image: radial-gradient(1100px 520px at 75% -10%, rgba(255, 95, 200, 0.07), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(255, 95, 200, 0.04), transparent 60%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -162,7 +166,7 @@ button:disabled {
 
 .card-accent {
   border-color: var(--accent-border);
-  background: linear-gradient(135deg, rgba(124, 92, 252, 0.04), transparent);
+  background: linear-gradient(135deg, rgba(255, 95, 200, 0.05), transparent);
 }
 
 .card-success {
@@ -257,7 +261,7 @@ button:disabled {
 
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
-  box-shadow: 0 0 20px rgba(124, 92, 252, 0.15);
+  box-shadow: 0 0 22px rgba(255, 95, 200, 0.22);
 }
 
 .btn-secondary {
