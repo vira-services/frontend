@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaCompactDisc, FaEraser } from "react-icons/fa6";
-import { setRichPresence, clearPresence, getPlatforms } from "@/lib/api";
+import { FaCompactDisc, FaEraser, FaFloppyDisk } from "react-icons/fa6";
+import { setRichPresence, clearPresence, getPlatforms, getPresenceSettings, savePresenceSettings, getModuleSettings, setRpcEnabled } from "@/lib/api";
 
 const activityTypes = [
   { value: 0, label: "Playing" },
@@ -19,14 +19,60 @@ const defaultForm = {
   stream_url: "", platform: "", start: "", end: "",
 };
 
+function buildPayload(form: any) {
+  const payload: any = {
+    name: form.name || null,
+    details: form.details || null,
+    state: form.state || null,
+    large_image_url: form.large_image_url || null,
+    large_text: form.large_text || null,
+    small_image_url: form.small_image_url || null,
+    small_text: form.small_text || null,
+    activity_type: parseInt(form.activity_type) || 0,
+    stream_url: form.stream_url || null,
+    platform: form.platform || null,
+    button1_label: form.button1_label || null,
+    button1_url: form.button1_url || null,
+    button2_label: form.button2_label || null,
+    button2_url: form.button2_url || null,
+    start: form.start ? parseInt(form.start) : null,
+    end: form.end ? parseInt(form.end) : null,
+  };
+  return payload;
+}
+
 export default function RpcPage() {
   const [form, setForm] = useState(defaultForm);
+  const [enabled, setEnabled] = useState(true);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [platforms, setPlatforms] = useState<any>(null);
 
   useEffect(() => {
     getPlatforms().then(setPlatforms).catch(() => {});
+    getPresenceSettings()
+      .then((d) => {
+        const s = d?.settings;
+        if (!s) return;
+        setForm((f) => ({
+          ...f,
+          name: s.name || "", details: s.details || "", state: s.state || "",
+          large_image_url: s.large_image_url || "", large_text: s.large_text || "",
+          small_image_url: s.small_image_url || "", small_text: s.small_text || "",
+          button1_label: s.button1_label || "", button1_url: s.button1_url || "",
+          button2_label: s.button2_label || "", button2_url: s.button2_url || "",
+          stream_url: s.stream_url || "", platform: s.platform || "",
+          activity_type: typeof s.activity_type === "number" ? s.activity_type : 0,
+          start: s.start ? String(s.start) : "",
+          end: s.end ? String(s.end) : "",
+        }));
+      })
+      .catch(() => {});
+    getModuleSettings()
+      .then((m) => {
+        if (m && typeof m.rpc_enabled === "boolean") setEnabled(m.rpc_enabled);
+      })
+      .catch(() => {});
   }, []);
 
   const setField = (field: string, value: any) => setForm((f) => ({ ...f, [field]: value }));
@@ -35,21 +81,24 @@ export default function RpcPage() {
     setLoading(true);
     setMessage("");
     try {
-      const payload: any = { name: form.name || " ", activity_type: form.activity_type };
-      if (form.details) payload.details = form.details;
-      if (form.state) payload.state = form.state;
-      if (form.large_image_url) payload.large_image_url = form.large_image_url;
-      if (form.large_text) payload.large_text = form.large_text;
-      if (form.small_image_url) payload.small_image_url = form.small_image_url;
-      if (form.small_text) payload.small_text = form.small_text;
-      if (form.stream_url) payload.stream_url = form.stream_url;
-      if (form.platform) payload.platform = form.platform;
-      if (form.button1_label && form.button1_url) { payload.button1_label = form.button1_label; payload.button1_url = form.button1_url; }
-      if (form.button2_label && form.button2_url) { payload.button2_label = form.button2_label; payload.button2_url = form.button2_url; }
-      if (form.start) payload.start = parseInt(form.start);
-      if (form.end) payload.end = parseInt(form.end);
+      const payload = buildPayload(form);
+      if (!payload.name) payload.name = " ";
       await setRichPresence(payload);
-      setMessage("Rich presence set!");
+      await savePresenceSettings(payload);
+      setMessage("Rich presence set and saved!");
+    } catch (e: any) {
+      setMessage(`Error: ${e.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setLoading(true);
+    setMessage("");
+    try {
+      await savePresenceSettings(buildPayload(form));
+      setMessage("Saved to database");
     } catch (e: any) {
       setMessage(`Error: ${e.message}`);
     } finally {
@@ -64,6 +113,20 @@ export default function RpcPage() {
       await clearPresence();
       setForm(defaultForm);
       setMessage("Presence cleared");
+    } catch (e: any) {
+      setMessage(`Error: ${e.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggle = async (next: boolean) => {
+    setLoading(true);
+    setMessage("");
+    try {
+      await setRpcEnabled(next);
+      setEnabled(next);
+      setMessage(next ? "Rich presence enabled. Saved settings will be applied." : "Rich presence disabled");
     } catch (e: any) {
       setMessage(`Error: ${e.message}`);
     } finally {
@@ -94,6 +157,28 @@ export default function RpcPage() {
           Activity
         </div>
         <div className="card" style={{ padding: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+            <div>
+              <p style={{ fontSize: 13.5, fontWeight: 500, color: "var(--text-primary)" }}>Enable rich presence</p>
+              <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 1 }}>
+                Restores your saved activity after a restart
+              </p>
+            </div>
+            <button
+              onClick={() => handleToggle(!enabled)}
+              disabled={loading}
+              className={`toggle ${enabled ? "toggle-on" : "toggle-off"}`}
+            >
+              <span className="toggle-knob" />
+            </button>
+          </div>
+
+          {!enabled && (
+            <div className="message message-warning" style={{ marginBottom: 20 }}>
+              <span>Rich presence is disabled. Configure your activity and enable it when ready.</span>
+            </div>
+          )}
+
           <div className="form-row" style={{ marginBottom: 16 }}>
             <div className="form-group">
               <label className="form-label">Activity type</label>
@@ -191,8 +276,12 @@ export default function RpcPage() {
           </div>
 
           <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
-            <button onClick={handleSetPresence} disabled={loading} className="btn btn-primary">
+            <button onClick={handleSetPresence} disabled={loading || !enabled} className="btn btn-primary">
               {loading ? "Sending..." : "Set presence"}
+            </button>
+            <button onClick={handleSave} disabled={loading || !enabled} className="btn btn-ghost">
+              <FaFloppyDisk style={{ fontSize: 12 }} />
+              Save
             </button>
             <button onClick={handleClear} disabled={loading} className="btn btn-ghost" style={{ color: "var(--danger)" }}>
               <FaEraser style={{ fontSize: 12 }} />

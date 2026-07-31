@@ -68,10 +68,12 @@ export function getDevicePresets() {
   return request("/device/presets");
 }
 
-export function setDevicePreset(preset: string) {
+export function setDevicePreset(preset: string, enabled?: boolean) {
+  const body: any = { preset };
+  if (enabled !== undefined) body.enabled = enabled;
   return request("/device/preset", {
     method: "POST",
-    body: JSON.stringify({ preset }),
+    body: JSON.stringify(body),
   });
 }
 
@@ -149,6 +151,13 @@ export function savePresenceSettings(data: any) {
   return request("/presence/settings/save", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+export function setRpcEnabled(enabled: boolean) {
+  return request("/rpc/toggle", {
+    method: "POST",
+    body: JSON.stringify({ enabled }),
   });
 }
 
