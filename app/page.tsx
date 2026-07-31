@@ -40,43 +40,44 @@ function LandingNavbar() {
   );
 }
 
-const ROTATING_WORDS = ["free", "reliable", "fast"];
+const ROTATING_WORDS = ["free", "safe", "fast"];
 
 function HeroHeadline() {
   const [wordIndex, setWordIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    let transitionTimer: ReturnType<typeof setTimeout> | undefined;
     const rotationTimer = setInterval(() => {
-      setIsVisible(false);
-      transitionTimer = setTimeout(() => {
-        setWordIndex((current) => (current + 1) % ROTATING_WORDS.length);
-        setIsVisible(true);
-      }, 350);
+      setWordIndex((current) => (current + 1) % ROTATING_WORDS.length);
     }, 2000);
 
-    return () => {
-      clearInterval(rotationTimer);
-      if (transitionTimer) clearTimeout(transitionTimer);
-    };
+    return () => clearInterval(rotationTimer);
   }, []);
 
   return (
     <div className="pointer-events-none absolute left-[12vw] top-[48%] z-10 -translate-y-1/2">
       <h1 className="whitespace-nowrap text-2xl font-semibold tracking-[-0.04em] text-white sm:text-3xl lg:text-4xl">
         Selfbot that is{" "}
-        <span
-          className={`inline-block text-[#E04CC8] transition-all duration-300 ease-out ${
-            isVisible ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
-          }`}
-        >
-          {ROTATING_WORDS[wordIndex]}
+        <span className="inline-grid text-center">
+          {ROTATING_WORDS.map((word, index) => (
+            <span
+              key={word}
+              style={{ gridArea: "1 / 1" }}
+              className={`text-center text-[#E04CC8] transition-opacity duration-300 ease-out ${
+                index === wordIndex ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              {word}
+            </span>
+          ))}
         </span>,{" "}
         and in your reach
       </h1>
-      <p className="mt-2 text-center text-xl font-medium tracking-wide text-white/60 sm:text-2xl">meet vira.</p>
+      <p className="mt-2 text-center text-xl font-medium italic tracking-wide text-white sm:text-2xl">meet vira.</p>
       <div className="mt-3 h-px w-full bg-gradient-to-r from-[#E04CC8]/80 via-white/40 to-transparent" />
+      <p className="mt-3 text-center font-medium text-white/70">
+        <span className="font-bold">800</span> users are hosted with{" "}
+        <span className="font-semibold text-white">vira</span>
+      </p>
     </div>
   );
 }
