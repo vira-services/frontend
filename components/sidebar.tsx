@@ -7,8 +7,11 @@ import {
   FaDesktop,
   FaRotate,
   FaCircle,
-  FaMusic,
+  FaGamepad,
   FaRobot,
+  FaBolt,
+  FaPalette,
+  FaCamera,
   FaRightFromBracket,
   FaChevronDown,
   FaUser,
@@ -51,10 +54,18 @@ const navGroups: NavGroup[] = [
           { label: "Device", path: "/dashboard/device", Icon: FaDesktop },
           { label: "Rotator", path: "/dashboard/rotator", Icon: FaRotate },
           { label: "Status", path: "/dashboard/status", Icon: FaCircle },
-          { label: "Rich presence", path: "/dashboard/rpc", Icon: FaMusic },
+          { label: "Rich presence", path: "/dashboard/rpc", Icon: FaGamepad },
         ],
       },
-      { label: "Customize", path: "/dashboard/customize", Icon: FaRobot },
+      {
+        label: "Customize",
+        Icon: FaRobot,
+        sub: [
+          { label: "General", path: "/dashboard/customize", Icon: FaBolt },
+          { label: "Appearance", path: "/dashboard/customize?tab=appearance", Icon: FaPalette },
+          { label: "Avatar", path: "/dashboard/customize?tab=avatar", Icon: FaCamera },
+        ],
+      },
     ],
   },
 ];
@@ -95,7 +106,7 @@ export default function Sidebar() {
   };
 
   const renderLeaf = (item: NavLeaf, indent: boolean) => {
-    const active = pathname === item.path;
+    const active = pathname === item.path.split("?")[0];
     const Icon = item.Icon;
     return (
       <a
@@ -143,7 +154,7 @@ export default function Sidebar() {
   const renderSub = (item: NavSub) => {
     const Icon = item.Icon;
     const isCollapsed = subCollapsed[item.label];
-    const active = item.sub.some((s) => pathname === s.path);
+    const active = item.sub.some((s) => pathname === s.path.split("?")[0]);
     return (
       <div key={item.label}>
         <button
