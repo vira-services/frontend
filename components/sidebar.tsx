@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ComponentType, type SVGProps } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import {
   FaBorderAll,
   FaDesktop,
@@ -72,12 +72,16 @@ const navGroups: NavGroup[] = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [subCollapsed, setSubCollapsed] = useState<Record<string, boolean>>({});
   const [menuOpen, setMenuOpen] = useState(false);
   const [username, setUsername] = useState("User");
   const [avatar, setAvatar] = useState<string | null>(null);
+
+  const query = searchParams.toString();
+  const currentPath = query ? `${pathname}?${query}` : pathname;
 
   useEffect(() => {
     setUsername(localStorage.getItem("vira_username") || "User");
@@ -106,7 +110,7 @@ export default function Sidebar() {
   };
 
   const renderLeaf = (item: NavLeaf, indent: boolean) => {
-    const active = pathname === item.path.split("?")[0];
+    const active = currentPath === item.path;
     const Icon = item.Icon;
     return (
       <a
@@ -154,7 +158,7 @@ export default function Sidebar() {
   const renderSub = (item: NavSub) => {
     const Icon = item.Icon;
     const isCollapsed = subCollapsed[item.label];
-    const active = item.sub.some((s) => pathname === s.path.split("?")[0]);
+    const active = item.sub.some((s) => currentPath === s.path);
     return (
       <div key={item.label}>
         <button
@@ -248,7 +252,7 @@ export default function Sidebar() {
                   onClick={() => toggleGroup(group.label)}
                   className="mb-0.5 flex w-full items-center rounded-lg px-2.5 py-1.5 text-left text-[10.5px] font-semibold tracking-[0.02em] text-[var(--text-muted)] hover:text-[var(--text-secondary)] justify-between"
                 >
-                  <span>{group.label}</span>
+                  <span style={{ color: "var(--accent)" }}>{group.label}</span>
                   <FaChevronDown
                     style={{
                       fontSize: 9,

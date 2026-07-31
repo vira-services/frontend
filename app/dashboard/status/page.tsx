@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { FaCircle, FaMoon, FaCircleMinus, FaCheck, FaFaceSmile, FaEraser } from "react-icons/fa6";
+import { FaCheck, FaFaceSmile, FaEraser, FaSignal } from "react-icons/fa6";
 import { setCustomStatus, clearPresence } from "@/lib/api";
 
 const presences = [
-  { value: "online", label: "Online", icon: FaCircle, color: "#22c55e" },
-  { value: "idle", label: "Idle", icon: FaMoon, color: "#eab308" },
-  { value: "dnd", label: "Do not disturb", icon: FaCircleMinus, color: "#ef4444" },
-  { value: "invisible", label: "Invisible", icon: FaCircle, color: "#52525b" },
+  { value: "online", label: "Online", image: "https://i.imgur.com/QU35DxI.png" },
+  { value: "idle", label: "Idle", image: "https://i.imgur.com/eHW8KmV.png" },
+  { value: "dnd", label: "Do not disturb", image: "https://i.imgur.com/JlXjK4S.png" },
+  { value: "offline", label: "Offline", image: "https://i.imgur.com/w3EYDuS.png" },
 ];
 
 const clearOptions = [
@@ -87,13 +87,12 @@ export default function StatusPage() {
 
       <div className="page-section">
         <div className="section-title">
-          <FaCircle style={{ fontSize: 10, opacity: 0.6 }} />
+          <FaSignal style={{ fontSize: 11, opacity: 0.6 }} />
           Presence
         </div>
         <div className="card" style={{ padding: 20 }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 8 }}>
             {presences.map((p) => {
-              const Icon = p.icon;
               const active = currentPresence === p.value;
               return (
                 <button
@@ -102,7 +101,13 @@ export default function StatusPage() {
                   className={active ? "option-btn option-btn-active" : "option-btn"}
                   style={{ padding: "12px 14px", justifyContent: "flex-start" }}
                 >
-                  <Icon style={{ fontSize: 16, color: p.color }} />
+                  <img
+                    src={p.image}
+                    alt={p.label}
+                    width="20"
+                    height="20"
+                    style={{ flexShrink: 0 }}
+                  />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 500 }}>{p.label}</div>
                   </div>

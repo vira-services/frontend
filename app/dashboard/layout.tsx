@@ -1,10 +1,13 @@
+import { Suspense } from "react";
 import Sidebar from "@/components/sidebar";
 import TokenGate from "@/components/token-gate";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative isolate min-h-screen" style={{ background: "var(--bg-primary)", color: "var(--text-primary)" }}>
-      <Sidebar />
+      <Suspense fallback={null}>
+        <Sidebar />
+      </Suspense>
       <TokenGate />
       <div className="flex min-h-screen flex-col transition-[padding] duration-300 md:pl-[var(--sidebar-w)]">
         <main className="relative z-10 flex-1 min-w-0">
