@@ -130,7 +130,7 @@ function HeroHeadline() {
   return (
     <div className="pointer-events-none absolute left-[12vw] top-[48%] z-10 -translate-y-1/2">
       <h1 className="whitespace-nowrap text-2xl font-semibold tracking-[-0.04em] text-white sm:text-3xl lg:text-4xl">
-        Selfbot that is{" "}
+        biolink that is{" "}
         <span className="inline-grid text-center">
           {ROTATING_WORDS.map((word, index) => (
             <span
