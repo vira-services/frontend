@@ -1,4 +1,4 @@
-import type { HTMLAttributes } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 const SAFARI_WIDTH = 1203;
 const SAFARI_HEIGHT = 753;
@@ -19,6 +19,7 @@ export interface SafariProps extends HTMLAttributes<HTMLDivElement> {
   imageSrc?: string;
   videoSrc?: string;
   mode?: SafariMode;
+  children?: ReactNode;
 }
 
 export function Safari({
@@ -28,10 +29,11 @@ export function Safari({
   mode = "default",
   className,
   style,
+  children,
   ...props
 }: SafariProps) {
   const hasVideo = !!videoSrc;
-  const hasMedia = hasVideo || !!imageSrc;
+  const hasImage = !!imageSrc;
 
   return (
     <div
@@ -61,7 +63,7 @@ export function Safari({
         </div>
       )}
 
-      {!hasVideo && imageSrc && (
+      {!hasVideo && hasImage && (
         <div
           className="pointer-events-none absolute z-0 overflow-hidden"
           style={{
@@ -72,11 +74,27 @@ export function Safari({
             borderRadius: "0 0 11px 11px",
           }}
         >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageSrc}
             alt=""
             className="block size-full object-cover object-top"
           />
+        </div>
+      )}
+
+      {!hasVideo && !hasImage && (
+        <div
+          className="pointer-events-none absolute z-0 flex items-center justify-center overflow-hidden"
+          style={{
+            left: `${LEFT_PCT}%`,
+            top: `${TOP_PCT}%`,
+            width: `${WIDTH_PCT}%`,
+            height: `${HEIGHT_PCT}%`,
+            borderRadius: "0 0 11px 11px",
+          }}
+        >
+          {children}
         </div>
       )}
 
@@ -102,7 +120,7 @@ export function Safari({
 
         <g
           clipPath="url(#safariFrame)"
-          mask={hasMedia ? "url(#safariPunch)" : undefined}
+          mask={hasVideo || hasImage ? "url(#safariPunch)" : undefined}
         >
           <path
             d="M0 52H1202V741C1202 747.627 1196.63 753 1190 753H12C5.37258 753 0 747.627 0 741V52Z"

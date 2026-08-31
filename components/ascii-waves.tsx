@@ -1,13 +1,15 @@
-'use client';
+"use client";
 
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from "react";
 
 function cn(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
 function flowField(px: number, py: number, t: number): number {
-  return Math.sin(px + Math.sin(py + t * 0.1)) * Math.sin(py * px * 0.1 + t * 0.2);
+  return (
+    Math.sin(px + Math.sin(py + t * 0.1)) * Math.sin(py * px * 0.1 + t * 0.2)
+  );
 }
 
 function computeField(
@@ -55,8 +57,8 @@ export interface AsciiWavesProps {
 }
 
 const AsciiWaves: React.FC<AsciiWavesProps> = ({
-  characters = ' .:-+*=%@#',
-  color = '#ffffff',
+  characters = " .:-+*=%@#",
+  color = "#ffffff",
   invert = false,
   noiseScale = 2.0,
   elementSize = 16.0,
@@ -64,17 +66,16 @@ const AsciiWaves: React.FC<AsciiWavesProps> = ({
   intensity = 1.0,
   waveTension = 0.5,
   waveTwist = 0.1,
-  className = '',
+  className = "",
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animRef = useRef<number>(0);
   const startTime = useRef(0);
 
-  const render = useCallback(() => {
+  const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const rect = canvas.getBoundingClientRect();
@@ -96,8 +97,8 @@ const AsciiWaves: React.FC<AsciiWavesProps> = ({
 
     ctx.clearRect(0, 0, w, h);
     ctx.font = `bold ${elementSize * 0.85}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
     ctx.fillStyle = color;
 
@@ -118,10 +119,13 @@ const AsciiWaves: React.FC<AsciiWavesProps> = ({
 
         if (invert) val = 1 - val;
 
-        const charIdx = Math.min(Math.floor(val * (charCount - 1)), charCount - 1);
+        const charIdx = Math.min(
+          Math.floor(val * (charCount - 1)),
+          charCount - 1,
+        );
         const char = characters[charIdx];
 
-        if (char === ' ') continue;
+        if (char === " ") continue;
 
         const alpha = val * 0.8 + 0.2;
         ctx.globalAlpha = alpha;
@@ -130,7 +134,6 @@ const AsciiWaves: React.FC<AsciiWavesProps> = ({
     }
 
     ctx.globalAlpha = 1;
-    animRef.current = requestAnimationFrame(render);
   }, [
     characters,
     color,
@@ -145,13 +148,26 @@ const AsciiWaves: React.FC<AsciiWavesProps> = ({
 
   useEffect(() => {
     startTime.current = performance.now();
-    animRef.current = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(animRef.current);
-  }, [render]);
+
+    let rafId = 0;
+
+    function loop() {
+      draw();
+      rafId = requestAnimationFrame(loop);
+    }
+
+    loop();
+
+    return () => cancelAnimationFrame(rafId);
+  }, [draw]);
 
   return (
-    <div className={cn('relative h-full w-full overflow-hidden', className)}>
-      <canvas ref={canvasRef} className="h-full w-full" style={{ display: 'block' }} />
+    <div className={cn("relative h-full w-full overflow-hidden", className)}>
+      <canvas
+        ref={canvasRef}
+        className="h-full w-full"
+        style={{ display: "block" }}
+      />
     </div>
   );
 };

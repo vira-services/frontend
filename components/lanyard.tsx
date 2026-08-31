@@ -49,6 +49,28 @@ interface LanyardData {
   }[];
 }
 
+function ActivityIcon({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-white/10 text-[11px] font-bold text-white/40">
+        {alt?.[0]?.toUpperCase() || "?"}
+      </div>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt=""
+      onError={() => setFailed(true)}
+      className="size-9 shrink-0 rounded-md bg-white/10 object-cover"
+    />
+  );
+}
+
 function PresenceCard({ userId }: { userId: string }) {
   const [data, setData] = useState<LanyardData | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -69,7 +91,7 @@ function PresenceCard({ userId }: { userId: string }) {
         JSON.stringify({
           op: 2,
           d: { subscribe_keys: [`user:${userId}`] },
-        })
+        }),
       );
     };
 
@@ -115,6 +137,7 @@ function PresenceCard({ userId }: { userId: string }) {
     <div className="rounded-xl border border-white/10 bg-white/5 p-4">
       <div className="flex items-center gap-3">
         <div className="relative">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`https://api.lanyard.rest/${userId}.png`}
             alt={data.username}
@@ -135,11 +158,7 @@ function PresenceCard({ userId }: { userId: string }) {
 
       {fake && (
         <div className="mt-3 flex items-center gap-2.5 border-t border-white/10 pt-3">
-          <img
-            src={fake.activityImage}
-            alt=""
-            className="size-9 shrink-0 rounded-md bg-white/10 object-cover"
-          />
+          <ActivityIcon src={fake.activityImage} alt={fake.activityName} />
           <div className="min-w-0">
             <p className="text-[11px] text-white/30">{fake.activityLabel}</p>
             <p className="truncate text-xs font-medium text-white">

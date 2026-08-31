@@ -72,6 +72,7 @@ export default function MusicPlayer() {
   const [duration, setDuration] = useState(0);
   const [accent, setAccent] = useState("rgba(180,120,80,0.35)");
   const [accentText, setAccentText] = useState("rgba(180,120,80,1)");
+  const [error, setError] = useState(false);
   const scrubberRef = useRef<HTMLDivElement>(null);
   const seeking = useRef(false);
 
@@ -87,7 +88,10 @@ export default function MusicPlayer() {
       if (!ctx) return;
       ctx.drawImage(img, 0, 0, 50, 50);
       const data = ctx.getImageData(0, 0, 50, 50).data;
-      let r = 0, g = 0, b = 0, count = 0;
+      let r = 0,
+        g = 0,
+        b = 0,
+        count = 0;
       for (let i = 0; i < data.length; i += 16) {
         r += data[i];
         g += data[i + 1];
@@ -115,15 +119,21 @@ export default function MusicPlayer() {
       setPlaying(false);
       setProgress(0);
     };
+    const onError = () => {
+      setError(true);
+      setPlaying(false);
+    };
     audio.addEventListener("timeupdate", onTime);
     audio.addEventListener("loadedmetadata", onMeta);
     audio.addEventListener("canplay", onMeta);
     audio.addEventListener("ended", onEnd);
+    audio.addEventListener("error", onError);
     return () => {
       audio.removeEventListener("timeupdate", onTime);
       audio.removeEventListener("loadedmetadata", onMeta);
       audio.removeEventListener("canplay", onMeta);
       audio.removeEventListener("ended", onEnd);
+      audio.removeEventListener("error", onError);
     };
   }, []);
 
@@ -145,13 +155,16 @@ export default function MusicPlayer() {
 
   const toggle = () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || error) return;
     if (playing) {
       audio.pause();
+      setPlaying(false);
     } else {
-      audio.play();
+      audio
+        .play()
+        .then(() => setPlaying(true))
+        .catch(() => {});
     }
-    setPlaying(!playing);
   };
 
   const handleScrub = (clientX: number) => {
@@ -187,11 +200,17 @@ export default function MusicPlayer() {
       <audio ref={audioRef} src="/tems.mp3" preload="auto" />
 
       <div className="flex items-center gap-4 p-5">
-        <img
-          src="/tems.png"
-          alt="Tems - Higher"
-          className="size-20 rounded-xl object-cover shadow-lg"
-        />
+        <div className="size-20 shrink-0 overflow-hidden rounded-xl bg-white/10 shadow-lg">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/tems.png"
+            alt="Tems - Higher"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).style.display = "none";
+            }}
+            className="size-20 object-cover"
+          />
+        </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-lg font-bold text-white">Higher</p>
           <p className="truncate text-sm text-white/60">Tems</p>
@@ -200,13 +219,20 @@ export default function MusicPlayer() {
             <button
               type="button"
               onClick={toggle}
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform hover:scale-105"
+              disabled={error}
+              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
             >
-              {playing ? <MdPause className="size-4" /> : <FaPlay className="size-3.5 ml-0.5" />}
+              {playing ? (
+                <MdPause className="size-4" />
+              ) : (
+                <FaPlay className="size-3.5 ml-0.5" />
+              )}
             </button>
 
             <div className="flex flex-1 items-center gap-2">
-              <span className="text-[11px] tabular-nums text-white/50">{formatTime(progress)}</span>
+              <span className="text-[11px] tabular-nums text-white/50">
+                {formatTime(progress)}
+              </span>
               <div
                 ref={scrubberRef}
                 onMouseDown={handleMouseDown}
@@ -221,9 +247,16 @@ export default function MusicPlayer() {
                   style={{ left: `${pct}%` }}
                 />
               </div>
-              <span className="text-[11px] tabular-nums text-white/50">{formatTime(duration)}</span>
+              <span className="text-[11px] tabular-nums text-white/50">
+                {formatTime(duration)}
+              </span>
             </div>
           </div>
+          {error && (
+            <p className="mt-2 text-[11px] text-red-300/80">
+              Track not found — add tems.mp3 to /public
+            </p>
+          )}
         </div>
       </div>
 
@@ -241,8 +274,8 @@ export default function MusicPlayer() {
                 i === currentLineIdx
                   ? "font-semibold text-white"
                   : Math.abs(i - currentLineIdx) <= 2
-                  ? "text-white/40"
-                  : "text-white/20"
+                    ? "text-white/40"
+                    : "text-white/20"
               }`}
             >
               {line.text || "\u00A0"}
