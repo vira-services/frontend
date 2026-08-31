@@ -10,6 +10,7 @@ import { handleServerErrors, ViraError } from "@/lib/error";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import z from "zod";
+import { logToDiscord } from "@/lib/api/utils/discordLog";
 
 // yes i couldve named this like users or sum but ion feel like it :skull:
 // params should be ?limit=
@@ -133,6 +134,14 @@ export async function POST(req: NextRequest) {
         performedBy: session.userId,
         targetUserId: targetUser.id,
       });
+      void logToDiscord({
+        title: "⚙️ Admin: alias token gifted",
+        color: "info",
+        fields: [
+          { name: "Target", value: targetUser.username, inline: true },
+          { name: "By", value: session.userId, inline: true },
+        ],
+      });
     }
     if (uid !== undefined && swap_with_uid !== undefined) {
       const [otherUser] = await db
@@ -157,6 +166,15 @@ export async function POST(req: NextRequest) {
         performedBy: session.userId,
         targetUserId: targetUser.id,
       });
+      void logToDiscord({
+        title: "⚙️ Admin: UID swap",
+        color: "info",
+        fields: [
+          { name: "Target", value: targetUser.username, inline: true },
+          { name: "Other", value: otherUser.username, inline: true },
+          { name: "By", value: session.userId, inline: true },
+        ],
+      });
     }
     if (premium !== undefined) {
       updates.premium = premium;
@@ -165,6 +183,14 @@ export async function POST(req: NextRequest) {
         action: premium ? "premium_grant" : "premium_revoke",
         performedBy: session.userId,
         targetUserId: targetUser.id,
+      });
+      void logToDiscord({
+        title: premium ? "💎 Admin: premium granted" : "⚙️ Admin: premium revoked",
+        color: premium ? "success" : "warning",
+        fields: [
+          { name: "Target", value: targetUser.username, inline: true },
+          { name: "By", value: session.userId, inline: true },
+        ],
       });
     }
     if (url !== undefined && url !== targetUser.url) {
@@ -185,6 +211,16 @@ export async function POST(req: NextRequest) {
         action: "url_change",
         performedBy: session.userId,
         targetUserId: targetUser.id,
+      });
+      void logToDiscord({
+        title: "⚙️ Admin: URL changed",
+        color: "info",
+        fields: [
+          { name: "Target", value: targetUser.username, inline: true },
+          { name: "Old URL", value: targetUser.url, inline: true },
+          { name: "New URL", value: url, inline: true },
+          { name: "By", value: session.userId, inline: true },
+        ],
       });
     }
     if (Object.keys(updates).length > 0) {
@@ -211,6 +247,15 @@ export async function POST(req: NextRequest) {
         action: blacklist ? "blacklist" : "unblacklist",
         performedBy: session.userId,
         targetUserId: targetUser.id,
+      });
+      void logToDiscord({
+        title: blacklist ? "🚫 Admin: user blacklisted" : "⚙️ Admin: user unblacklisted",
+        color: blacklist ? "danger" : "info",
+        fields: [
+          { name: "Target", value: targetUser.username, inline: true },
+          { name: "By", value: session.userId, inline: true },
+          ...(blacklist ? [{ name: "Reason", value: blacklist_reason ?? "—", inline: true }] : []),
+        ],
       });
     }
 

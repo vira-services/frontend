@@ -8,6 +8,7 @@ import { getSession } from "@/lib/auth";
 import { handleServerErrors, ViraError } from "@/lib/error";
 import { eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { logToDiscord } from "@/lib/api/utils/discordLog";
 
 export async function POST(req: NextRequest) {
   try {
@@ -75,6 +76,15 @@ export async function POST(req: NextRequest) {
         redeemedAt: new Date(),
       })
       .where(eq(aliasTokensTable.id, tokenRow.id));
+
+    void logToDiscord({
+      title: "🎟️ Alias token redeemed",
+      color: "success",
+      fields: [
+        { name: "User ID", value: session.userId, inline: true },
+        { name: "Alias", value: alias, inline: true },
+      ],
+    });
 
     return NextResponse.json(
       { success: true, alias: granted.alias },

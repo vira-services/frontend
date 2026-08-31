@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth";
 import { handleServerErrors } from "@/lib/error";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { logToDiscord } from "@/lib/api/utils/discordLog";
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,6 +29,12 @@ export async function POST(req: NextRequest) {
         { status: 404 },
       );
     }
+
+    void logToDiscord({
+      title: "🔌 Discord disconnected",
+      color: "warning",
+      fields: [{ name: "User ID", value: session.userId, inline: true }],
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

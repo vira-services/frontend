@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { connectionsTable } from "@/db/schemas";
 import { getSession } from "@/lib/auth";
 import { applyClaimedAliasByDiscordId } from "@/lib/claims/applyClaim";
+import { logToDiscord } from "@/lib/api/utils/discordLog";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -93,6 +94,15 @@ export async function GET(req: NextRequest) {
     } catch (err) {
       console.error("Failed to apply claimed 1L alias:", err);
     }
+
+    void logToDiscord({
+      title: "🔗 Discord connected",
+      color: "success",
+      fields: [
+        { name: "Discord", value: `${discordUsername} (${discordId})`, inline: true },
+        { name: "User ID", value: session.userId, inline: true },
+      ],
+    });
 
     return NextResponse.redirect(
       new URL("/dashboard/settings?discord_connected=true", "http://localhost:3000"),

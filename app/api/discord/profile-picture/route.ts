@@ -10,7 +10,7 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 
-const PRESENCE_DISCORD_API = "http://localhost:3001";
+const PRESENCE_DISCORD_API = "https://discord.vira.wtf";
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"];
 const MIME_TO_EXT: Record<string, string> = {
   "image/png": "png",

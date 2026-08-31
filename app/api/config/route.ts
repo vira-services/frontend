@@ -13,6 +13,7 @@ import { handleServerErrors, ViraError } from "@/lib/error";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { configSchema } from "@/lib/validation/zod";
+import { logToDiscord } from "@/lib/api/utils/discordLog";
 export async function PATCH(req: NextRequest) {
   try {
     const session = await getSession();
@@ -102,6 +103,26 @@ export async function PATCH(req: NextRequest) {
           .where(eq(widgetsTable.id, widget.id));
       }
     }
+
+    const changedFields = [
+      ...Object.keys(configData),
+      ...(backgrounds?.length ? ["backgrounds"] : []),
+      ...(audios?.length ? ["audios"] : []),
+      ...(links?.length ? ["links"] : []),
+      ...(badges?.length ? ["badges"] : []),
+      ...(widgets?.length ? ["widgets"] : []),
+    ];
+    if (changedFields.length > 0) {
+      void logToDiscord({
+        title: "🛠️ Profile settings updated",
+        color: "info",
+        fields: [
+          { name: "User ID", value: session.userId, inline: true },
+          { name: "Fields", value: changedFields.join(", "), inline: false },
+        ],
+      });
+    }
+
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     return handleServerErrors(error);

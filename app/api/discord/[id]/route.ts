@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PRESENCE_DISCORD_API = "http://localhost:3001";
+const PRESENCE_DISCORD_API = "https://discord.vira.wtf";
 
 export async function GET(
   req: NextRequest,

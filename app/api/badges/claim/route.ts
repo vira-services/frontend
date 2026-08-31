@@ -6,6 +6,7 @@ import { BADGE_CONFIG, getColor } from "@/lib/badges";
 import { eq, and, count } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { logToDiscord } from "@/lib/api/utils/discordLog";
 
 const OG_LIMIT = 50;
 
@@ -145,6 +146,16 @@ export async function POST(req: NextRequest) {
         position: nextPosition,
       })
       .returning();
+
+    void logToDiscord({
+      title: "🏅 Badge claimed",
+      color: "success",
+      fields: [
+        { name: "User ID", value: session.userId, inline: true },
+        { name: "Badge", value: config.name, inline: true },
+      ],
+    });
+
     return NextResponse.json({ badge }, { status: 201 });
   } catch (error) {
     return handleServerErrors(error);

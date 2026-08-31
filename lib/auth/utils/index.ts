@@ -9,6 +9,7 @@ import { ViraError } from "@/lib/error";
 import { desc, eq, or } from "drizzle-orm";
 import argon2 from "argon2";
 import { createSession } from "..";
+import { logToDiscord } from "@/lib/api/utils/discordLog";
 
 export function parseUserAgent(userAgent: string) {
   let browser = "Unknown Browser";
@@ -102,6 +103,15 @@ export default async function createUser({
   await db.insert(configsTable).values({
     userId: user.id,
   });
+  void logToDiscord({
+    title: "🆕 New sign up",
+    color: "success",
+    fields: [
+      { name: "Username", value: user.username, inline: true },
+      { name: "Email", value: user.email, inline: true },
+      { name: "URL", value: `vira.wtf/${user.url}`, inline: true },
+    ],
+  });
   return user;
 }
 
@@ -149,4 +159,15 @@ export async function authenticateUser({
     })
     .returning({ id: sessionsTable.id });
   await createSession({ sessionId: session.id });
+  void logToDiscord({
+    title: "🔑 Login",
+    color: "info",
+    fields: [
+      { name: "Username", value: user.username, inline: true },
+      { name: "Email", value: user.email, inline: true },
+      { name: "IP", value: ip ?? "unknown", inline: true },
+      { name: "OS", value: os ?? "unknown", inline: true },
+      { name: "Browser", value: browser ?? "unknown", inline: true },
+    ],
+  });
 }

@@ -13,11 +13,9 @@ import {
   IconLink,
   IconMusic,
   IconSparkles,
-  IconPlayerPlayFilled,
-  IconHeart,
 } from "@tabler/icons-react";
-import { SiDiscord, SiGithub, SiSpotify } from "react-icons/si";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Hero() {
   const [username, setUsername] = useState("");
@@ -131,56 +129,23 @@ export default function Hero() {
         </motion.div>
       </section>
 
-      {/* profile card mockup */}
+      {/* dashboard preview */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.25 }}
-        className="mt-14 w-full max-w-sm px-4"
+        className="relative mt-14 w-full max-w-5xl px-4"
       >
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-2xl shadow-2xl shadow-black/40">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#8B5CF6] to-[#6366F1] text-lg font-bold text-white">
-              v
-            </div>
-            <div className="text-left">
-              <div className="font-semibold text-white">vira</div>
-              <div className="text-sm text-white/50">@vira · 1L</div>
-            </div>
-            <div className="ml-auto rounded-full bg-white/10 px-2.5 py-1 text-xs text-white/60">
-              vira.wtf/vira
-            </div>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-white/10 bg-black/25 p-3">
-            <div className="flex items-center gap-2">
-              <SiSpotify className="text-[#1DB954]" size={16} />
-              <span className="text-sm font-medium text-white">Daydreaming</span>
-              <button className="ml-auto flex h-9 w-9 items-center justify-center rounded-full bg-white text-black">
-                <IconPlayerPlayFilled size={16} />
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-3 space-y-2">
-            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-medium text-white">
-              <IconBrandX size={15} /> X / Twitter
-            </div>
-            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-medium text-white">
-              <SiDiscord size={15} className="text-[#5865F2]" /> Discord Server
-            </div>
-            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-medium text-white">
-              <SiGithub size={15} /> GitHub
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between text-white/40">
-            <span>3 links</span>
-            <span className="inline-flex items-center gap-1">
-              <IconHeart size={13} /> 128
-            </span>
-            <span>Music</span>
-          </div>
+        <div className="pointer-events-none absolute inset-x-8 top-8 -z-10 h-2/3 rounded-full bg-[#8B5CF6]/25 blur-[100px]" />
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-1.5 shadow-2xl shadow-black/50 backdrop-blur-2xl sm:p-2">
+          <Image
+            src="/dashboard.png"
+            alt="Vira dashboard preview"
+            width={1920}
+            height={1203}
+            priority
+            className="w-full rounded-xl border border-white/10"
+          />
         </div>
       </motion.div>
     </section>

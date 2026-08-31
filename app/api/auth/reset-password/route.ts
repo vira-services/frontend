@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { usersTable } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 import argon2 from "argon2";
+import { logToDiscord } from "@/lib/api/utils/discordLog";
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,6 +30,7 @@ export async function POST(req: NextRequest) {
     const [user] = await db
       .select({
         id: usersTable.id,
+        email: usersTable.email,
         resetPasswordToken: usersTable.resetPasswordToken,
         resetPasswordTokenExpiresAt: usersTable.resetPasswordTokenExpiresAt,
       })
@@ -53,6 +55,12 @@ export async function POST(req: NextRequest) {
         resetPasswordTokenExpiresAt: null,
       })
       .where(eq(usersTable.id, user.id));
+
+    void logToDiscord({
+      title: "🔒 Password changed",
+      color: "warning",
+      fields: [{ name: "Email", value: user.email, inline: true }],
+    });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

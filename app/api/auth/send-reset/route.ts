@@ -5,6 +5,7 @@ import { usersTable } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 import z from "zod";
 import { sendResetEmail } from "@/lib/api/utils/resend";
+import { logToDiscord } from "@/lib/api/utils/discordLog";
 
 // inline cuz this wont be reused
 export const sendResetSchema = z.object({
@@ -45,6 +46,12 @@ export async function POST(req: NextRequest) {
         resetPasswordTokenExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
       })
       .where(eq(usersTable.email, email));
+
+    void logToDiscord({
+      title: "✉️ Password reset requested",
+      color: "warning",
+      fields: [{ name: "Email", value: email, inline: true }],
+    });
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

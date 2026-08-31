@@ -4,6 +4,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { db } from "@/db";
 import { sessionsTable, usersTable } from "@/db/schemas";
 import { eq, and, gt } from "drizzle-orm";
+import { logToDiscord } from "@/lib/api/utils/discordLog";
 
 const cookie_name = "_Vira_session";
 const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
@@ -69,10 +70,27 @@ export async function deleteSession() {
     try {
       const { payload } = await jwtVerify(token, secret);
       const sessionId = payload.sessionId as string;
-      await db
+      const [session] = await db
         .update(sessionsTable)
         .set({ isActive: false })
-        .where(eq(sessionsTable.id, sessionId));
+        .where(eq(sessionsTable.id, sessionId))
+        .returning({ userId: sessionsTable.userId });
+      if (session) {
+        const [user] = await db
+          .select({ username: usersTable.username, email: usersTable.email })
+          .from(usersTable)
+          .where(eq(usersTable.id, session.userId));
+        if (user) {
+          void logToDiscord({
+            title: "🚪 Logout",
+            color: "warning",
+            fields: [
+              { name: "Username", value: user.username, inline: true },
+              { name: "Email", value: user.email, inline: true },
+            ],
+          });
+        }
+      }
     } catch {
     }
   }
