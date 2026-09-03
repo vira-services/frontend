@@ -160,7 +160,12 @@ function AuthForm() {
         toast.success("Account created! You can now log in.");
         router.push("/auth");
       } else {
-        router.push("/dashboard");
+        const next = searchParams.get("next");
+        if (next && next.startsWith("/") && !next.startsWith("//")) {
+          router.push(next);
+        } else {
+          router.push("/dashboard");
+        }
       }
     } catch {
       toast.error("Couldn't reach the server, try again");

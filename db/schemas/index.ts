@@ -17,3 +17,7 @@ export * from "./configs/widgets";
 export * from "./analytics/views";
 // audit logs
 export * from "./audit_logs";
+// admin
+export * from "./admin/username_bans";
+// gifts
+export * from "./gifts";

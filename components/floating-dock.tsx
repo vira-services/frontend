@@ -24,6 +24,7 @@ import {
   IconLogout,
   IconSettings,
   IconUserFilled,
+  IconUserShield,
 } from "@tabler/icons-react";
 import { PiPaintBrushFill } from "react-icons/pi";
 import { useUser } from "@/app/dashboard/_user-provider";
@@ -68,6 +69,12 @@ const navLinks: NavLink[] = [
   },
 ];
 
+const adminLink: NavLink = {
+  icon: <IconUserShield size={18} />,
+  name: "Admin",
+  url: "/dashboard/admin",
+};
+
 function isActive(item: NavLink, pathname: string, searchParams: URLSearchParams) {
   const [urlPath, urlQuery] = item.url.split("?");
   const pathMatches = pathname === urlPath;
@@ -111,6 +118,8 @@ export function FloatingDock() {
   const router = useRouter();
   const { user } = useUser();
 
+  const isAdmin = !!user && (user.admin || user.superadmin || user.owner);
+
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/auth");
@@ -126,6 +135,8 @@ export function FloatingDock() {
           {navLinks.map((item) => (
             <DockItem key={item.name} item={item} />
           ))}
+
+          {isAdmin && <DockItem item={adminLink} />}
 
           <div className="mx-1 h-6 w-px bg-white/15" />
 

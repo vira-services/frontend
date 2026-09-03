@@ -7,6 +7,11 @@ export const actionEnum = pgEnum("action", [
   "premium_grant",
   "premium_revoke",
   "alias_tokens_gift",
+  "password_reset",
+  "username_ban",
+  "username_unban",
+  "gift_create",
+  "gift_revoke",
 ]);
 export const auditLogsTable = pgTable("audit_logs", {
   id: text()

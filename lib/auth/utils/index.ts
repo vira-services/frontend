@@ -3,6 +3,7 @@ import {
   aliasesTable,
   configsTable,
   sessionsTable,
+  usernameBansTable,
   usersTable,
 } from "@/db/schemas";
 import { ViraError } from "@/lib/error";
@@ -69,6 +70,15 @@ export default async function createUser({
     .where(eq(aliasesTable.alias, url))
     .limit(1);
   if (existingAlias.length > 0) throw new ViraError("URL already taken", 409);
+
+  const bannedUsername = await db
+    .select({ username: usernameBansTable.username })
+    .from(usernameBansTable)
+    .where(or(eq(usernameBansTable.username, username), eq(usernameBansTable.username, url)))
+    .limit(1);
+  if (bannedUsername.length > 0) {
+    throw new ViraError("This username is banned and cannot be used", 403);
+  }
 
   const [lastUser] = await db
     .select({ uid: usersTable.uid })

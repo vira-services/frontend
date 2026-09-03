@@ -23,6 +23,9 @@ export default async function getAccount() {
       url: usersTable.url,
       uid: usersTable.uid,
       premium: usersTable.premium,
+      admin: usersTable.admin,
+      superadmin: usersTable.superadmin,
+      owner: usersTable.owner,
       config: {
         avatar_url: configsTable.avatar_url,
         description: configsTable.description,

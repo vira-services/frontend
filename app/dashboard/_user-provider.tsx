@@ -7,6 +7,9 @@ and probably avatar uploader for yk
 */
 type User = {
   username: string;
+  admin?: boolean;
+  superadmin?: boolean;
+  owner?: boolean;
   config?: {
     avatar_url: string | null;
   } | null;
