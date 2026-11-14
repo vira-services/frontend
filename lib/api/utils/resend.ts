@@ -1,8 +1,20 @@
 import { Resend } from "resend";
-const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Lazily created so importing this module (e.g. while Next.js collects page
+// data during `next build`) does not require RESEND_API_KEY.
+function getResend() {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY environment variable is not set");
+  }
+
+  return new Resend(apiKey);
+}
+
 export async function sendVerificationEmail(email: string, token: string) {
   const confirmLink = `https://vira.wtf/verification?token=${token}`;
-  await resend.emails.send({
+  await getResend().emails.send({
     from: "noreply@vira.wtf",
     to: email,
     subject: "Verify your email address - Vira",
@@ -18,7 +30,7 @@ export async function sendVerificationEmail(email: string, token: string) {
 }
 export async function sendResetEmail(email: string, token: string) {
   const resetLink = `https://vira.wtf/auth/reset-password?token=${token}`;
-  await resend.emails.send({
+  await getResend().emails.send({
     from: "noreply@vira.wtf",
     to: email,
     subject: "Reset your password - Vira",
