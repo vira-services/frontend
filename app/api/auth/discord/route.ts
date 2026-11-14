@@ -1,7 +1,8 @@
+import { getDiscordRedirectUri } from "@/lib/app-url";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const redirectUri = `http://localhost:3000/api/auth/discord/callback`;
+  const redirectUri = getDiscordRedirectUri(req);
   const clientId = process.env.DISCORD_CLIENTID;
   if (!clientId) {
     return NextResponse.json(

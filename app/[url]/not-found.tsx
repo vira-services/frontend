@@ -89,7 +89,7 @@ export default async function NotFound({ url = "" }: { url?: string } = {}) {
                 size="sm"
                 className="flex-1 gap-1.5 rounded-xl"
               >
-                <Link href={`http://localhost:3000/${loggedInUser}`}>
+                <Link href={`/${loggedInUser}`}>
                   <IconCopy size={13} /> Copy link
                 </Link>
               </Button>

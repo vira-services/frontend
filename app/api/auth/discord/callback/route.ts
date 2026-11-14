@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { connectionsTable } from "@/db/schemas";
 import { getSession } from "@/lib/auth";
+import { getAppOrigin, getDiscordRedirectUri } from "@/lib/app-url";
 import { applyClaimedAliasByDiscordId } from "@/lib/claims/applyClaim";
 import { logToDiscord } from "@/lib/api/utils/discordLog";
 import { and, eq } from "drizzle-orm";
@@ -10,14 +11,14 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
     if (!session) {
-      return NextResponse.redirect(new URL("/auth", "http://localhost:3000"));
+      return NextResponse.redirect(new URL("/auth", getAppOrigin(req)));
     }
 
-    const { searchParams, origin } = req.nextUrl;
+    const { searchParams } = req.nextUrl;
     const code = searchParams.get("code");
     if (!code) {
       return NextResponse.redirect(
-        new URL("/dashboard/settings?error=missing_code", "http://localhost:3000"),
+        new URL("/dashboard/settings?error=missing_code", getAppOrigin(req)),
       );
     }
 
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
       throw new Error("Discord environment variables are not configured");
     }
 
-    const redirectUri = `http://localhost:3000/api/auth/discord/callback`;
+    const redirectUri = getDiscordRedirectUri(req);
 
     const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
       const errorText = await tokenResponse.text();
       console.error("Discord token exchange failed:", errorText);
       return NextResponse.redirect(
-        new URL("/dashboard/settings?error=token_exchange_failed", "http://localhost:3000"),
+        new URL("/dashboard/settings?error=token_exchange_failed", getAppOrigin(req)),
       );
     }
 
@@ -62,7 +63,7 @@ export async function GET(req: NextRequest) {
 
     if (!userResponse.ok) {
       return NextResponse.redirect(
-        new URL("/dashboard/settings?error=user_fetch_failed", "http://localhost:3000"),
+        new URL("/dashboard/settings?error=user_fetch_failed", getAppOrigin(req)),
       );
     }
 
@@ -105,12 +106,12 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.redirect(
-      new URL("/dashboard/settings?discord_connected=true", "http://localhost:3000"),
+      new URL("/dashboard/settings?discord_connected=true", getAppOrigin(req)),
     );
   } catch (error) {
     console.error("Discord callback error:", error);
     return NextResponse.redirect(
-      new URL("/dashboard/settings?error=unknown", "http://localhost:3000"),
+      new URL("/dashboard/settings?error=unknown", getAppOrigin(req)),
     );
   }
 }
